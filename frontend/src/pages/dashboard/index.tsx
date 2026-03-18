@@ -17,7 +17,7 @@ import {
   CartesianGrid,
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../../components/ui/chart"
-import { api, productService, saleService } from "@/services/api.ts";
+import { dashboardService, productService, saleService } from "@/services/api.ts";
 import { AlertTriangle, Clock, DollarSign, Package, Sun, TrendingDown, TrendingUp, User } from "lucide-react";
 
 interface TopProduct extends Product {
@@ -103,21 +103,18 @@ export function Dashboard() {
   }
 
   const fetchTopProducts = async (limit: number = 10) => {
-    const response = await api(`http://localhost:3000/api/products/top-selling?limit=${limit}`);
-    const data = response.data;
+    const data = await dashboardService.getTopProducts(limit);
     setTopProducts(data);
   };
 
   const fetchTopCustomers = async (limit: number = 10) => {
-    const response = await api(`http://localhost:3000/api/customers/top-customers?limit=${limit}`);
-    const data = response.data;
+    const data = await dashboardService.getTopCustomers(limit);
     setTopCustomers(data);
   };
 
   const fetchSalesTotal = async () => {
-    const response = await api(`http://localhost:3000/api/sales/total`);
-    const data = response.data.totalRevenue;
-    setSalesTotal(data);
+    const data = await dashboardService.getSalesTotal();
+    setSalesTotal(data.totalRevenue);
   };
 
   const fetchSalesStats = async () => {

@@ -62,17 +62,30 @@ export const authService = {
 // ========== USERS ==========
 export const userService = {
   getProfile: async () => {
-    const response = await api.get<{ id: number; name: string; email: string; role: string }>("/users/me");
+    const response = await api.get<{
+      id: number;
+      name: string;
+      email: string;
+      role: string;
+    }>("/users/me");
     return response.data;
   },
 
   updateProfile: async (name: string, email: string) => {
-    const response = await api.put<{ id: number; name: string; email: string; role: string }>("/users/me", { name, email });
+    const response = await api.put<{
+      id: number;
+      name: string;
+      email: string;
+      role: string;
+    }>("/users/me", { name, email });
     return response.data;
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await api.patch("/users/me/password", { currentPassword, newPassword });
+    const response = await api.patch("/users/me/password", {
+      currentPassword,
+      newPassword,
+    });
     return response.data;
   },
 };
@@ -168,6 +181,24 @@ export const customerService = {
 
   delete: async (id: number) => {
     await api.delete(`/customers/${id}`);
+  },
+};
+
+// ========== DASHBOARD ==========
+export const dashboardService = {
+  getTopProducts: async (limit: number = 10) => {
+    const response = await api.get(`/products/top-selling?limit=${limit}`);
+    return response.data;
+  },
+
+  getTopCustomers: async (limit: number = 10) => {
+    const response = await api.get(`/customers/top-customers?limit=${limit}`);
+    return response.data;
+  },
+
+  getSalesTotal: async () => {
+    const response = await api.get<{ totalRevenue: number }>("/sales/total");
+    return response.data;
   },
 };
 
