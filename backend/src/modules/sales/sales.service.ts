@@ -275,4 +275,161 @@ export const salesService = {
       });
     });
   },
+
+  async getTotalRevenue() {
+    const result = await prisma.sale.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        status: {
+          not: "CANCELLED", // Ignora vendas canceladas
+        },
+      },
+    });
+
+    return {
+      totalRevenue: Number(result._sum.total) || 0,
+    };
+  },
+
+  async getStats() {
+    const [totalResult, countResult] = await Promise.all([
+      // Valor total
+      prisma.sale.aggregate({
+        _sum: {
+          total: true,
+        },
+        where: {
+          status: { not: "CANCELLED" },
+        },
+      }),
+      // Quantidade de vendas
+      prisma.sale.count({
+        where: {
+          status: { not: "CANCELLED" },
+        },
+      }),
+    ]);
+
+    const totalRevenue = Number(totalResult._sum.total) || 0;
+    const totalSales = countResult;
+    const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+
+    return {
+      totalRevenue,
+      totalSales,
+      averageTicket, // ← Ticket médio
+    };
+  },
+
+  async getMonthlyRevenue(year?: number) {
+    const currentYear = year || new Date().getFullYear();
+
+    const sales = await prisma.sale.findMany({
+      where: {
+        status: { not: "CANCELLED" },
+        createdAt: {
+          gte: new Date(`${currentYear}-01-01`),
+          lte: new Date(`${currentYear}-12-31`),
+        },
+      },
+      select: {
+        total: true,
+        createdAt: true,
+      },
+    });
+
+    // Agrupar por mês
+    const monthlyData = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      revenue: 0,
+    }));
+
+    sales.forEach((sale) => {
+      const month = sale.createdAt.getMonth(); // 0-11
+      monthlyData[month].revenue += Number(sale.total);
+    });
+
+    // Nomes dos meses
+    const monthNames = [
+      "Jan",
+      "Fev",
+      "Mar",
+      "Abr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Set",
+      "Out",
+      "Nov",
+      "Dez",
+    ];
+
+    return monthlyData.map((data, index) => ({
+      month: monthNames[index],
+      revenue: Math.round(data.revenue * 100) / 100, // Arredondar 2 casas
+    }));
+  },
+
+  async getTodaySales() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const [totalResult, countResult] = await Promise.all([
+      prisma.sale.aggregate({
+        _sum: {
+          total: true,
+        },
+        where: {
+          status: { not: "CANCELLED" },
+          createdAt: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+      }),
+      prisma.sale.count({
+        where: {
+          status: { not: "CANCELLED" },
+          createdAt: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      totalRevenue: Number(totalResult._sum.total) || 0,
+      totalSales: countResult,
+    };
+  },
+
+  async getPendingSales() {
+    const [totalResult, countResult] = await Promise.all([
+      prisma.sale.aggregate({
+        _sum: {
+          total: true,
+        },
+        where: {
+          status: "PENDING",
+        },
+      }),
+      prisma.sale.count({
+        where: {
+          status: "PENDING",
+        },
+      }),
+    ]);
+
+    return {
+      totalPending: Number(totalResult._sum.total) || 0,
+      count: countResult,
+    };
+  },
 };

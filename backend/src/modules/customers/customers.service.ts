@@ -121,4 +121,51 @@ export const customersService = {
 
     return { message: "Cliente deletado com sucesso" };
   },
+
+  async topCustomers(limit: number = 10) {
+    // Buscar vendas agrupadas por cliente
+    const topCustomers = await prisma.sale.groupBy({
+      by: ["customerId"],
+      _sum: {
+        total: true, // ← Soma o valor total gasto
+      },
+      _count: {
+        id: true, // ← Conta quantas compras fez
+      },
+      where: {
+        status: {
+          not: "CANCELLED", // ← Ignora vendas canceladas
+        },
+      },
+      orderBy: {
+        _sum: {
+          total: "desc", // ← Ordena por quem gastou mais
+        },
+      },
+      take: limit,
+    });
+
+    // Buscar detalhes dos clientes
+    const customerIds = topCustomers.map((item) => item.customerId);
+
+    const customers = await prisma.customer.findMany({
+      where: {
+        id: { in: customerIds },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    // Combinar dados
+    return topCustomers.map((item) => {
+      const customer = customers.find((c) => c.id === item.customerId);
+      return {
+        ...customer,
+        totalSpent: Number(item._sum.total) || 0, // Total gasto
+        totalPurchases: item._count.id, // Quantidade de compras
+      };
+    });
+  },
 };

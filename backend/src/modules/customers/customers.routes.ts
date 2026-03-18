@@ -8,6 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get("/", customersController.list);
+router.get("/top-customers", customersController.topCustomers);
 router.get("/:id", customersController.getById);
 router.post("/", customersController.create);
 router.put("/:id", customersController.update);

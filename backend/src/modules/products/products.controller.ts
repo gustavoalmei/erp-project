@@ -170,4 +170,38 @@ export const productsController = {
       return res.status(500).json({ error: "Erro interno do servidor" });
     }
   },
+
+  async topSelling(req: Request, res: Response) {
+    try {
+      const limit = Number(req.query.limit) || 5;
+
+      if (limit < 1 || limit > 20) {
+        return res.status(400).json({
+          error: "Limit deve ser entre 1 e 20",
+        });
+      }
+
+      const products = await productsService.topSelling(limit);
+      return res.status(200).json(products);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
+
+  async getLowStock(req: Request, res: Response) {
+    try {
+      const threshold = Number(req.query.threshold) || 10;
+
+      if (threshold < 1) {
+        return res
+          .status(400)
+          .json({ error: "Threshold deve ser maior que 0" });
+      }
+
+      const data = await productsService.getLowStock(threshold);
+      return res.status(200).json(data);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
 };

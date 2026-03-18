@@ -122,4 +122,21 @@ export const customersController = {
       return res.status(500).json({ error: "Erro interno do servidor" });
     }
   },
+
+  async topCustomers(req: Request, res: Response) {
+    try {
+      const limit = Number(req.query.limit) || 10;
+
+      if (limit < 1 || limit > 20) {
+        return res.status(400).json({
+          error: "Limit deve ser entre 1 e 20",
+        });
+      }
+
+      const customers = await customersService.topCustomers(limit);
+      return res.status(200).json(customers);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
 };

@@ -132,4 +132,51 @@ export const salesController = {
       return res.status(500).json({ error: "Erro interno do servidor" });
     }
   },
+
+  async getTotalRevenue(req: Request, res: Response) {
+    try {
+      const data = await salesService.getTotalRevenue();
+      return res.status(200).json(data);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
+
+  async getStats(req: Request, res: Response) {
+    try {
+      const data = await salesService.getStats();
+      return res.status(200).json(data);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
+
+  async getMonthlyRevenue(req: Request, res: Response) {
+    try {
+      const year = req.query.year ? Number(req.query.year) : undefined;
+
+      const data = await salesService.getMonthlyRevenue(year);
+      return res.status(200).json(data);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
+
+  async getTodaySales(req: Request, res: Response) {
+    try {
+      const data = await salesService.getTodaySales();
+      return res.status(200).json(data);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
+
+  async getPendingSales(req: Request, res: Response) {
+    try {
+      const data = await salesService.getPendingSales();
+      return res.status(200).json(data);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
 };

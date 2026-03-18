@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree -L 3 -I node_modules //wsl.localhost/Ubuntu/home/gustavo-almeida/erp-project/frontend)",
+      "Read(///wsl.localhost/Ubuntu/home/gustavo-almeida/erp-project/**)"
+    ]
+  }
+}

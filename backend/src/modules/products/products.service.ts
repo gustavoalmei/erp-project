@@ -127,4 +127,77 @@ export const productsService = {
 
     return { message: "Produto deletado com sucesso" };
   },
+
+  async topSelling(limit: number = 5) {
+    // Buscar itens de venda agrupados por produto
+    const topProducts = await prisma.saleItem.groupBy({
+      by: ["productId"],
+      _sum: {
+        quantity: true,
+      },
+      orderBy: {
+        _sum: {
+          quantity: "desc",
+        },
+      },
+      take: limit,
+    });
+
+    // Buscar detalhes dos produtos
+    const productIds = topProducts.map((item) => item.productId);
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        stock: true,
+      },
+    });
+
+    // Combinar quantidade vendida com detalhes do produto
+    return topProducts.map((item) => {
+      const product = products.find((p) => p.id === item.productId);
+      return {
+        ...product,
+        totalSold: item._sum.quantity || 0,
+      };
+    });
+  },
+
+  async getLowStock(threshold: number = 10) {
+    const count = await prisma.product.count({
+      where: {
+        stock: {
+          lt: threshold,
+        },
+      },
+    });
+
+    const products = await prisma.product.findMany({
+      where: {
+        stock: {
+          lt: threshold,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        stock: true,
+        sku: true,
+      },
+      orderBy: {
+        stock: "asc",
+      },
+      take: 5,
+    });
+
+    return {
+      count,
+      products,
+    };
+  },
 };
