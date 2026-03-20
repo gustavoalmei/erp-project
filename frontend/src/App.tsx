@@ -4,10 +4,12 @@ import { RegisterPage } from './pages/auth/Register';
 import { Dashboard } from './pages/dashboard';
 import { Products } from './pages/products';
 import { Categories } from './pages/categories';
-import { SettingsPage } from './pages/settings';
+import { ProfilePage } from './pages/auth/Profile';
 import { PrivateRoute } from './components/PrivateRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { Layout } from './components/layout';
+import { Users } from './pages/users';
+import { NotFound } from './pages/NotFound';
 
 function App() {
 
@@ -19,7 +21,7 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
             <Layout element={<Dashboard />} />
           </PrivateRoute>
         }
@@ -27,7 +29,7 @@ function App() {
       <Route
         path="/products"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
             <Layout element={<Products />} />
           </PrivateRoute>
         }
@@ -35,17 +37,32 @@ function App() {
       <Route
         path="/categories"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
             <Layout element={<Categories />} />
           </PrivateRoute>
         }
       />
       <Route
-        path="/settings"
+        path="/profile"
         element={
-          <PrivateRoute>
-            <Layout element={<SettingsPage />} />
+          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+            <Layout element={<ProfilePage />} />
           </PrivateRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <PrivateRoute allowedRoles={['ADMIN']}>
+            <Layout element={<Users />} />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="*"
+        element={
+          <NotFound />
         }
       />
     </Routes>

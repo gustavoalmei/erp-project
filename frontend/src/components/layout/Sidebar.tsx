@@ -1,4 +1,4 @@
-import { CreditCard, LayoutDashboard, LogOut, Moon, Package, PanelRightClose, PanelRightOpen, Settings, Sun, Tags, User } from "lucide-react";
+import { CreditCard, LayoutDashboard, LogOut, Moon, Package, PanelRightClose, PanelRightOpen, Sun, Tags, User, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../theme-provider";
@@ -25,26 +25,37 @@ export function Sidebar() {
       icon: <LayoutDashboard className="w-5 h-5" />,
       label: 'Dashboard',
       path: '/dashboard',
-      redirect: '/dashboard'
+      redirect: '/dashboard',
+      havePermission: ['USER', 'ADMIN']
     },
     {
       icon: <Package className="w-5 h-5" />,
       label: 'Produtos',
       path: '/products',
-      redirect: '/products'
+      redirect: '/products',
+      havePermission: ['USER', 'ADMIN']
     },
     {
       icon: <Tags className="w-5 h-5" />,
       label: 'Categorias',
       path: '/categories',
-      redirect: '/categories'
+      redirect: '/categories',
+      havePermission: ['USER', 'ADMIN']
     },
     {
-      icon: <Settings className="w-5 h-5" />,
-      label: 'Settings',
-      path: '/settings',
-      redirect: '/settings'
+      icon: <Users className="w-5 h-5" />,
+      label: 'Clientes',
+      path: '/clients',
+      redirect: '/clients',
+      havePermission: ['USER', 'ADMIN']
     },
+    {
+      icon: <User className="w-5 h-5" />,
+      label: 'Usuários',
+      path: '/users',
+      redirect: '/users',
+      havePermission: ['ADMIN']
+    }
   ]
 
   const optionsMenu = [
@@ -72,6 +83,8 @@ export function Sidebar() {
             {menuItems.map((item, index) => {
               const optionActive = useLocation().pathname === item.path;
               const redirect = item.redirect || '';
+              const havePermission = item.havePermission.includes(user?.role || '');
+              if (!havePermission) return null;
               return (
                 <TooltipProvider key={index}>
                   <Tooltip delayDuration={100}>
@@ -137,7 +150,7 @@ export function Sidebar() {
                   </Card>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="
-                w-full 
+                w-[228px]
                 border-color-border-default 
                 bg-color-surface 
                 rounded-lg 
@@ -161,7 +174,8 @@ export function Sidebar() {
                     </DropdownMenuLabel>
                     {
                       optionsMenu.map((option, index) => (
-                        <DropdownMenuItem key={index} className="text-text 
+                        <Link key={index} to={option.path} className="w-full h-10">
+                          <DropdownMenuItem className="text-text 
                         bg-color-surface 
                         hover:bg-color-primary 
                         text-color-text-primary 
@@ -171,9 +185,10 @@ export function Sidebar() {
                         rounded-lg 
                         cursor-pointer
                         flex items-center gap-3">
-                          {option.icon}
-                          {option.label}
-                        </DropdownMenuItem>
+                            {option.icon}
+                            {option.label}
+                          </DropdownMenuItem>
+                        </Link>
                       ))
                     }
                   </DropdownMenuGroup>
@@ -243,7 +258,7 @@ export function Sidebar() {
               ) : (
                 <>
                   {theme === 'light' ?
-                    <Moon className="w-5 h-5 text-color-text-primary" /> : <Sun className="w-5 h-5 text-color-text-primary" />}
+                    <Sun className="w-5 h-5 text-color-text-primary" /> : <Moon className="w-5 h-5 text-color-text-primary" />}
                 </>
               )
             }

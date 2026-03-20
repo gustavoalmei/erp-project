@@ -30,10 +30,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedToken = localStorage.getItem('token');
 
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
+      authService.verify()
+        .then((res) => {
+          const parsed: User = JSON.parse(storedUser);
+          if (res.data.role !== parsed.role) {
+            parsed.role = res.data.role;
+            localStorage.setItem('user', JSON.stringify(parsed));
+          }
+          setUser(parsed);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-
-    setLoading(false);
   }, []);
 
   const login = async (data: LoginForm): Promise<LoginResponse> => {

@@ -9,7 +9,7 @@ import { Eye, EyeOff, KeyRound, Settings, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import type { User } from "../../types";
 
-export function SettingsPage() {
+export function ProfilePage() {
   const { user, updateUser } = useAuth();
 
   // --- Perfil ---

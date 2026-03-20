@@ -6,6 +6,13 @@ export interface User {
   role: "ADMIN" | "USER";
 }
 
+export interface UserForm {
+  id: number;
+  name: string;
+  email: string;
+  role: "ADMIN" | "USER";
+}
+
 export interface LoginResponse {
   token: string;
   user: User;

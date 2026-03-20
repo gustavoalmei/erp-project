@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
+  allowedRoles?: string[];
 }
 
-export function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isAuthenticated, loading } = useAuth();
+export function PrivateRoute({ children, allowedRoles }: PrivateRouteProps) {
+  const { user, isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
@@ -18,6 +19,10 @@ export function PrivateRoute({ children }: PrivateRouteProps) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user?.role || '')) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

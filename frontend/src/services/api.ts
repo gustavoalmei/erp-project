@@ -11,6 +11,8 @@ import type {
   CustomerForm,
   Sale,
   SaleForm,
+  User,
+  UserForm,
 } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
@@ -57,10 +59,32 @@ export const authService = {
   login: async (data: LoginForm) => {
     return await api.post<LoginResponse>("/auth/login", data);
   },
+
+  verify: async () => {
+    return await api.get<{
+      valid: boolean;
+      userId: number;
+      role: "ADMIN" | "USER";
+    }>("/auth/verify");
+  },
 };
 
 // ========== USERS ==========
 export const userService = {
+  getAll: async () => {
+    const response = await api.get<User[]>("/users/all");
+    return response.data;
+  },
+
+  delete: async (id: number) => {
+    return await api.delete(`/users/${id}`);
+  },
+
+  update: async (id: number, data: UserForm) => {
+    const response = await api.put<User>(`/users/${id}`, data);
+    return response.data;
+  },
+
   getProfile: async () => {
     const response = await api.get<{
       id: number;
