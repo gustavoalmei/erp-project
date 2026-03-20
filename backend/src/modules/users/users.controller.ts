@@ -65,7 +65,7 @@ export const usersController = {
 
   async updateUser(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
 
       const { name, email, role } = req.body;
@@ -88,7 +88,7 @@ export const usersController = {
 
   async deleteUser(req: Request, res: Response) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
 
       await usersService.deleteUser(id);
