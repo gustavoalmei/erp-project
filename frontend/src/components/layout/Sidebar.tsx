@@ -1,4 +1,4 @@
-import { CreditCard, LayoutDashboard, LogOut, Moon, Package, PanelRightClose, PanelRightOpen, SquareChevronDown, SquareChevronUp, Sun, Tags, User, Users } from "lucide-react";
+import { CreditCard, LayoutDashboard, LogOut, Moon, Package, PanelRightClose, PanelRightOpen, Sun, Tags, User, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../theme-provider";
