@@ -97,25 +97,26 @@ export function Sidebar() {
               ${isMobile && isExpanded ? `absolute top-0 left-0 z-50` : ``}
               ${isExpanded ? `w-64` : `w-16`} 
               bg-color-bg-secondary dark:bg-color-bg-primary 
+              overflow-auto
               rounded-2xl`}>
               <div className="
-        p-3.5
-        h-full 
-        flex
-        flex-col justify-between">
+                p-3.5
+                h-full 
+                flex
+                flex-col justify-between">
                 <div className="flex flex-col items-end">
                   <div
                     className="
-            cursor-pointer
-            bg-color-surface hover:bg-color-primary-hover
-            dark:bg-color-surface dark:hover:bg-color-primary-hover
-            text-color-text-primary hover:text-color-text-inverse dark:text-color-text-primary
-            transition-colors rounded-lg p-1.5"
+                      cursor-pointer
+                      bg-color-surface hover:bg-color-primary-hover
+                      dark:bg-color-surface dark:hover:bg-color-primary-hover
+                      text-color-text-primary hover:text-color-text-inverse dark:text-color-text-primary
+                      transition-colors rounded-lg p-1.5"
                     onClick={() => setIsExpanded(!isExpanded)}
                   >
                     {isExpanded ? <PanelRightOpen /> : <PanelRightClose />}
                   </div>
-                  <ul className="w-full flex flex-col gap-2 mt-2 overflow-hidden">
+                  <ul className="w-full flex flex-col gap-2 mt-2">
                     {menuItems.map((item, index) => {
                       const optionActive = useLocation().pathname === item.path;
                       const redirect = item.redirect || '';
@@ -153,7 +154,7 @@ export function Sidebar() {
                     })}
                   </ul>
                 </div>
-                <div className="w-full flex flex-col gap-2 overflow-hidden" >
+                <div className="w-full flex flex-col gap-2" >
                   <div className="w-full flex flex-col">
                     {isExpanded ? (
                       <DropdownMenu >
@@ -311,23 +312,25 @@ export function Sidebar() {
           bg-color-bg-secondary dark:bg-color-bg-primary 
           rounded-2xl`}>
           <div className="
-        p-3.5
-        h-full 
-        flex
-        flex-col justify-between">
+            p-3.5
+            h-full 
+            flex
+            flex-col justify-between">
             <div className="flex flex-col items-end">
               <div
                 className="
-            cursor-pointer
-            bg-color-surface hover:bg-color-primary-hover
-            dark:bg-color-surface dark:hover:bg-color-primary-hover
-            text-color-text-primary hover:text-color-text-inverse dark:text-color-text-primary
-            transition-colors rounded-lg p-1.5"
+                h-10
+                flex items-center
+                cursor-pointer
+                bg-color-surface hover:bg-color-primary-hover
+                dark:bg-color-surface dark:hover:bg-color-primary-hover
+                text-color-text-primary hover:text-color-text-inverse dark:text-color-text-primary
+                transition-colors rounded-lg p-1.5"
                 onClick={() => setIsExpanded(!isExpanded)}
               >
                 {isExpanded ? <PanelRightOpen /> : <PanelRightClose />}
               </div>
-              <ul className="w-full flex flex-col gap-2 mt-2 overflow-hidden">
+              <ul className="w-full flex flex-col gap-2 mt-2">
                 {menuItems.map((item, index) => {
                   const optionActive = useLocation().pathname === item.path;
                   const redirect = item.redirect || '';
@@ -337,16 +340,16 @@ export function Sidebar() {
                     <TooltipProvider key={index}>
                       <Tooltip delayDuration={100}>
                         <TooltipTrigger>
-                          <Link to={redirect} className="w-full h-10">
+                          <Link to={redirect} className="w-full h-[10px]">
                             <li
                               className={`
-                            w-full h-full flex items-center
-                            ${optionActive ? `bg-color-primary-active dark:bg-color-primary-active` : ''}
-                            ${optionActive ? `text-color-text-inverse dark:text-color-text-primary` : 'text-color-text-primary dark:text-color-text-primary'}
-                            hover:bg-color-primary-hover dark:hover:bg-color-primary-hover
-                            hover:text-color-text-inverse dark:hover:text-color-text-primary
-                            transition-colors rounded-lg cursor-pointer
-                            gap-2 p-2
+                              w-full h-10 flex items-center
+                              ${optionActive ? `bg-color-primary-active dark:bg-color-primary-active` : ''}
+                              ${optionActive ? `text-color-text-inverse dark:text-color-text-primary` : 'text-color-text-primary dark:text-color-text-primary'}
+                              hover:bg-color-primary-hover dark:hover:bg-color-primary-hover
+                              hover:text-color-text-inverse dark:hover:text-color-text-primary
+                              transition-colors rounded-lg cursor-pointer
+                              gap-2 p-2
                           `}
                             >
                               <div>
