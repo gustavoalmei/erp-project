@@ -16,7 +16,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../../components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../../components/ui/chart"
 import { dashboardService, productService, saleService } from "@/services/api.ts";
 import { AlertTriangle, Clock, DollarSign, Package, Sun, TrendingDown, TrendingUp, User } from "lucide-react";
 
@@ -73,8 +73,6 @@ export function Dashboard() {
     setGrowth(Math.round(growthPercent * 10) / 10); // 1 casa decimal
   };
 
-
-
   const loadRevenueData = async () => {
     const data = await saleService.getMonthlyRevenue(2025);
 
@@ -86,7 +84,6 @@ export function Dashboard() {
 
     setRevenueData(formattedData);
   };
-
 
   const returnFormatPrice = (price: number): string => {
     return new Intl.NumberFormat('pt-BR', {
@@ -178,6 +175,30 @@ export function Dashboard() {
     },
   ]
 
+  const chartConfig = {
+    month: {
+      label: "Mês",
+      theme: {
+        light: "#f24987",
+        dark: "#f24987",
+      },
+    },
+    revenue: {
+      label: "Receita",
+      theme: {
+        light: "#f24987",
+        dark: "#f24987",
+      },
+    },
+    expenses: {
+      label: "Despesas",
+      theme: {
+        light: "#b2bf4b",
+        dark: "#b2bf4b",
+      },
+    },
+  } satisfies ChartConfig
+
   useEffect(() => {
     fetchTopProducts();
     fetchTopCustomers();
@@ -243,27 +264,18 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <ChartContainer
-              config={{
-                revenue: {
-                  label: "Receita",
-                  color: "var(--color-primary)",
-                },
-                expenses: {
-                  label: "Despesas",
-                  color: "var(--color-accent)",
-                },
-              }}
+              config={chartConfig}
               className="h-[300px] w-full"
             >
               <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--color-revenue)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-expenses)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--color-expenses)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-default)" vertical={false} />
@@ -277,27 +289,24 @@ export function Dashboard() {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
-                  tickFormatter={(value) => `R$${value / 1000}k`}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}
-                  cursor={{ stroke: "var(--color-primary)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  cursor={{ stroke: "tex-white", strokeWidth: 1, strokeDasharray: "4 4" }}
                 />
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="var(--color-primary)"
+                  stroke="var(--color-revenue)"
                   strokeWidth={2}
                   fill="url(#revenueGradient)"
-                  name="Revenue"
                 />
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke="var(--color-accent)"
+                  stroke="var(--color-expenses)"
                   strokeWidth={2}
                   fill="url(#expensesGradient)"
-                  name="Expenses"
                 />
               </AreaChart>
             </ChartContainer>

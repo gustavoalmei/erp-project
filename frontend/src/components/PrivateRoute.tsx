@@ -11,7 +11,10 @@ export function PrivateRoute({ children, allowedRoles }: PrivateRouteProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="
+      bg-color-bg-secondary dark:bg-color-bg-primary 
+      flex items-center justify-center min-h-screen
+      text-color-text-primary dark:text-color-text-secondary">
         <div className="text-xl">Carregando...</div>
       </div>
     );

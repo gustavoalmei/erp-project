@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode, useLayoutEffect } from 'react';
 import type { User, LoginForm, RegisterForm, LoginResponse, RegisterResponse } from '../types';
 import { authService } from '../services/api.ts';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
@@ -17,6 +17,7 @@ interface AuthContextType {
   updateUser: (updated: User) => void;
   isAuthenticated: boolean;
   showToast: (data: ToastData) => void;
+  isMobile: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -24,6 +25,20 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+
+  useLayoutEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 500) {
+        setIsMobile(true);
+      } else {
+        setIsMobile(false);
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -90,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateUser,
         isAuthenticated: !!user,
         showToast,
+        isMobile
       }}
     >
       <ToastContainer
