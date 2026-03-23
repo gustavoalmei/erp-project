@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useLayoutEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 500) {
+      if (window.innerWidth < 768) {
         setIsMobile(true);
       } else {
         setIsMobile(false);
