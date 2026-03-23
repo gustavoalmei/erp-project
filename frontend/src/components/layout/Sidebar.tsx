@@ -65,7 +65,7 @@ export function Sidebar() {
   ]
 
   return (
-    <aside className="">
+    <aside>
       <div className="sm:hidden block">
         <div className="flex justify-between items-center">
           <div
@@ -87,9 +87,9 @@ export function Sidebar() {
           (<div className={`
               h-full
               transition-all duration-300
-              ${isMobile && isExpanded ? `absolute top-0 left-0 z-50` : ``}
-              ${isExpanded ? `w-64` : `w-16`} 
-              bg-color-bg-secondary dark:bg-color-bg-primary 
+              ${isMobile && isExpanded ? `fixed top-0 left-0 z-50` : ``}
+              ${isExpanded ? `w-64` : `w-16`}
+              bg-color-bg-secondary dark:bg-color-bg-primary
               overflow-auto
               rounded-2xl`}>
             <div className="
@@ -298,7 +298,7 @@ export function Sidebar() {
       <div className="hidden sm:block h-full">
         <div className={`
           h-full
-          ${isMobile && isExpanded ? `absolute top-0 left-0 z-50` : ``}
+          ${isMobile && isExpanded ? `fixed top-0 left-0 z-50` : ``}
           ${isExpanded ? `w-64` : `w-16`} 
           transition-all duration-300 
           bg-color-bg-secondary dark:bg-color-bg-primary 
