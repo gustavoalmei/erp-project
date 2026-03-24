@@ -190,7 +190,7 @@ export function Products() {
         </div>
         <Button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-color-primary hover:bg-color-primary-hover text-color-text-inverse"
+          className="flex items-center gap-2 bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
         >
           <Plus className="w-4 h-4" />
           Novo Produto
@@ -295,7 +295,7 @@ export function Products() {
 
       {/* Modal: Criar / Editar */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="bg-color-bg-secondary border-color-border-default max-w-lg">
+        <DialogContent className="bg-color-bg-secondary border-color-border-default max-w-lg text-color-text-primary">
           <DialogHeader>
             <DialogTitle className="text-color-text-primary">
               {editing ? "Editar Produto" : "Novo Produto"}
@@ -379,7 +379,7 @@ export function Products() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-color-primary hover:bg-color-primary-hover text-color-text-inverse"
+              className="bg-color-primary hover:bg-color-primary-hover dark:text-color-text-primary text-color-text-inverse"
             >
               {saving ? "Salvando..." : "Salvar"}
             </Button>

@@ -128,7 +128,7 @@ export function Categories() {
         </div>
         <Button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-color-primary hover:bg-color-primary-hover text-color-text-inverse"
+          className="flex items-center gap-2 bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
         >
           <Plus className="w-4 h-4" />
           Nova Categoria
@@ -208,7 +208,7 @@ export function Categories() {
 
       {/* Modal: Criar / Editar */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="bg-color-bg-secondary border-color-border-default">
+        <DialogContent className="bg-color-bg-secondary border-color-border-default text-color-text-primary">
           <DialogHeader>
             <DialogTitle className="text-color-text-primary">
               {editing ? "Editar Categoria" : "Nova Categoria"}
@@ -237,7 +237,7 @@ export function Categories() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-color-primary hover:bg-color-primary-hover text-color-text-inverse"
+              className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
             >
               {saving ? "Salvando..." : "Salvar"}
             </Button>
@@ -247,7 +247,7 @@ export function Categories() {
 
       {/* Modal: Confirmar exclusão */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="bg-color-bg-secondary border-color-border-default">
+        <DialogContent className="bg-color-bg-secondary border-color-border-default text-color-text-primary">
           <DialogHeader>
             <DialogTitle className="text-color-text-primary">Excluir Categoria</DialogTitle>
           </DialogHeader>
