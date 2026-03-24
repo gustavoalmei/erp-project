@@ -15,11 +15,11 @@ import {
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const { theme, setTheme } = useTheme();
-  const { user, isMobile } = useAuth();
+  const { user, isMobile, logout } = useAuth();
+  const location = useLocation();
   const initials = user?.name
     ? user.name.charAt(0).toUpperCase() + user.name.split(' ').pop()?.charAt(0).toUpperCase()
     : '';
-
   const menuItems = [
     {
       icon: <LayoutDashboard className="w-5 h-5" />,
@@ -61,7 +61,7 @@ export function Sidebar() {
   const optionsMenu = [
     { label: 'Profile', path: '/profile', icon: <User className="w-5 h-5" /> },
     { label: 'Billing', path: '/billing', icon: <CreditCard className="w-5 h-5" /> },
-    { label: 'Logout', path: '/logout', icon: <LogOut className="w-5 h-5" /> },
+    { label: 'Logout', path: '', onClick: () => { logout() }, icon: <LogOut className="w-5 h-5" /> },
   ]
 
   return (
@@ -111,7 +111,7 @@ export function Sidebar() {
                 </div>
                 <ul className="w-full flex flex-col gap-2 mt-2">
                   {menuItems.map((item, index) => {
-                    const optionActive = useLocation().pathname === item.path;
+                    const optionActive = location.pathname === item.path;
                     const redirect = item.redirect || '';
                     const havePermission = item.havePermission.includes(user?.role || '');
                     if (!havePermission) return null;
@@ -324,7 +324,7 @@ export function Sidebar() {
               </div>
               <ul className="w-full flex flex-col gap-2 mt-2">
                 {menuItems.map((item, index) => {
-                  const optionActive = useLocation().pathname === item.path;
+                  const optionActive = location.pathname === item.path;
                   const redirect = item.redirect || '';
                   const havePermission = item.havePermission.includes(user?.role || '');
                   if (!havePermission) return null;
@@ -417,17 +417,17 @@ export function Sidebar() {
                         </DropdownMenuLabel>
                         {
                           optionsMenu.map((option, index) => (
-                            <Link key={index} to={option.path} className="w-full h-10">
+                            <Link key={index} to={option.path} onClick={option.onClick} className="w-full h-10">
                               <DropdownMenuItem className="text-text 
-                        bg-color-surface 
-                        hover:bg-color-primary 
-                        text-color-text-primary 
-                        hover:text-color-text-inverse 
-                        dark:text-color-text-primary 
-                        dark:hover:text-color-text-primary 
-                        rounded-lg 
-                        cursor-pointer
-                        flex items-center gap-3">
+                                bg-color-surface 
+                                hover:bg-color-primary 
+                                text-color-text-primary 
+                                hover:text-color-text-inverse 
+                                dark:text-color-text-primary 
+                                dark:hover:text-color-text-primary 
+                                rounded-lg 
+                                cursor-pointer
+                                flex items-center gap-3">
                                 {option.icon}
                                 {option.label}
                               </DropdownMenuItem>

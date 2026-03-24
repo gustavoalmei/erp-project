@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { userService } from "@/services/api";
 import type { User, UserForm } from "@/types";
 import { useAuth } from "@/context/AuthContext";
-import { Edit, Plus, Search, Trash, Users as UsersIcon } from "lucide-react";
+import { Edit, Search, Trash, Users as UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -42,6 +42,7 @@ export function Users() {
     setIsDeleteDialogOpen(true);
     setSelectedUser(allUsers.find((u) => u.id === id) || null);
   }
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -102,12 +103,6 @@ export function Users() {
           <UsersIcon className="w-6 h-6 text-color-text-primary" />
           <h1 className="text-2xl font-bold text-color-text-primary">Usuários</h1>
         </div>
-        <Button
-          className="flex items-center gap-2 bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
-        >
-          <Plus className="w-4 h-4 text-color-text-primary" />
-          Novo Usuário
-        </Button>
       </div>
 
       {/* Busca */}
@@ -122,63 +117,63 @@ export function Users() {
       </div>
 
       {/* Tabela */}
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Perfil</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+      <Card className="border-color-border-default shadow-none">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-color-text-primary text-base">
+            {loading ? "Carregando..." : `${users.length} usuários`}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-color-text-secondary py-8">
-                  Carregando...
-                </TableCell>
+                <TableHead>Nome</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Perfil</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
-            ) : users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center text-color-text-secondary py-8">
-                  Nenhum usuário encontrado.
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="text-color-text-primary font-medium">{user.name}</TableCell>
-                  <TableCell className="text-color-text-primary">{user.email}</TableCell>
-                  <TableCell className="text-color-text-primary">
-                    <Badge variant="outline" className={`${user.role === "ADMIN" ? "text-red-300" : "text-green-300"} bg-color-surface border-color-border-default`}>
-                      {user.role === "ADMIN" ? "Administrador" : "Usuário"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="flex items-center gap-2 text-color-text-primary">
-                    <Edit className="w-4 h-4 text-color-text-primary cursor-pointer" onClick={() => handleEditUser(user.id)} />
-                    <Trash className="w-4 h-4 text-color-text-primary cursor-pointer" onClick={() => handleDeleteUser(user.id)} />
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-color-text-secondary py-8">
+                    Carregando...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={3} className="text-start text-color-text-secondary py-4">
-                {users.length} usuário{users.length !== 1 ? "s" : ""} encontrado{users.length !== 1 ? "s" : ""}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </div>
+              ) : users.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-color-text-secondary py-8">
+                    Nenhum usuário encontrado.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="text-color-text-primary font-medium">{user.name}</TableCell>
+                    <TableCell className="text-color-text-primary">{user.email}</TableCell>
+                    <TableCell className="text-color-text-primary">
+                      <Badge variant="outline" className={`${user.role === "ADMIN" ? "text-red-300" : "text-green-300"} bg-color-surface border-color-border-default`}>
+                        {user.role === "ADMIN" ? "Administrador" : "Usuário"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="flex items-center gap-2 text-color-text-primary">
+                      <Edit className="w-4 h-4 text-color-text-primary cursor-pointer" onClick={() => handleEditUser(user.id)} />
+                      <Trash className="w-4 h-4 text-color-text-primary cursor-pointer" onClick={() => handleDeleteUser(user.id)} />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      {/* Modal Editar Usuário */}
+      {/* Modal Criar/Editar Usuário */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-color-bg-secondary border-color-border-default">
+        <DialogContent className="bg-color-bg-secondary border-color-border-default text-color-text-primary">
           <DialogHeader>
             <DialogTitle className="text-color-text-primary">
-              {selectedUser ? "Editar Usuário" : "Novo Usuário"}
+              Editar Usuário
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">

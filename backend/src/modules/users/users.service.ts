@@ -5,7 +5,7 @@ import { authConfig } from "../../config/auth";
 export const usersService = {
   async getProfile(userId: number) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (!user) throw { code: 404, message: "Usuário não encontrado" };
     return { id: user.id, name: user.name, email: user.email, role: user.role };
   },
 
@@ -13,7 +13,7 @@ export const usersService = {
     const emailTaken = await prisma.user.findFirst({
       where: { email, NOT: { id: userId } },
     });
-    if (emailTaken) throw new Error("Email já está em uso");
+    if (emailTaken) throw { code: 409, message: "Email já está em uso" };
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -28,10 +28,10 @@ export const usersService = {
     newPassword: string,
   ) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (!user) throw { code: 404, message: "Usuário não encontrado" };
 
     const isValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isValid) throw new Error("Senha atual incorreta");
+    if (!isValid) throw { code: 422, message: "Senha atual incorreta" };
 
     const hashed = await bcrypt.hash(newPassword, authConfig.bcrypt.saltRounds);
     await prisma.user.update({
@@ -56,7 +56,7 @@ export const usersService = {
     const emailTaken = await prisma.user.findFirst({
       where: { email, NOT: { id: userId } },
     });
-    if (emailTaken) throw new Error("Email já está em uso");
+    if (emailTaken) throw { code: 409, message: "Email já está em uso" };
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -67,7 +67,7 @@ export const usersService = {
 
   async deleteUser(userId: number) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (!user) throw { code: 404, message: "Usuário não encontrado" };
     await prisma.user.delete({ where: { id: userId } });
   },
 };

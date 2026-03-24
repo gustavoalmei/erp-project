@@ -75,4 +75,14 @@ export const authController = {
       return res.status(500).json({ error: "Erro interno do servidor" });
     }
   },
+
+  async logout(req: Request, res: Response) {
+    try {
+      return res.status(200).json({
+        message: "Logout realizado com sucesso",
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  },
 };

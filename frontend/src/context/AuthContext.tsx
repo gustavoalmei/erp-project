@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode, useLayo
 import type { User, LoginForm, RegisterForm, LoginResponse, RegisterResponse } from '../types';
 import { authService } from '../services/api.ts';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 interface ToastData {
   message: string;
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -78,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    navigate('/login');
   };
 
   const updateUser = (updated: User) => {

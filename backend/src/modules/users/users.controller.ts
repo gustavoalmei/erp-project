@@ -7,7 +7,9 @@ export const usersController = {
       const user = await usersService.getProfile(req.userId!);
       return res.json(user);
     } catch (error: any) {
-      return res.status(404).json({ error: error.message });
+      return res
+        .status(error.code || 500)
+        .json({ error: error.message || "Erro interno do servidor" });
     }
   },
 
@@ -20,10 +22,9 @@ export const usersController = {
       const user = await usersService.updateProfile(req.userId!, name, email);
       return res.json(user);
     } catch (error: any) {
-      if (error.message === "Email já está em uso") {
-        return res.status(409).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res
+        .status(error.code || 500)
+        .json({ error: error.message || "Erro interno do servidor" });
     }
   },
 
@@ -47,10 +48,9 @@ export const usersController = {
       );
       return res.json({ message: "Senha alterada com sucesso" });
     } catch (error: any) {
-      if (error.message === "Senha atual incorreta") {
-        return res.status(401).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res
+        .status(error.code || 500)
+        .json({ error: error.message || "Erro interno do servidor" });
     }
   },
 
@@ -70,7 +70,9 @@ export const usersController = {
 
       const { name, email, role } = req.body;
       if (!name || !email || !role) {
-        return res.status(400).json({ error: "Nome, email e perfil são obrigatórios" });
+        return res
+          .status(400)
+          .json({ error: "Nome, email e perfil são obrigatórios" });
       }
       if (!["ADMIN", "USER"].includes(role)) {
         return res.status(400).json({ error: "Perfil inválido" });
@@ -79,10 +81,9 @@ export const usersController = {
       const user = await usersService.updateUser(id, name, email, role);
       return res.json(user);
     } catch (error: any) {
-      if (error.message === "Email já está em uso") {
-        return res.status(409).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res
+        .status(error.code || 500)
+        .json({ error: error.message || "Erro interno do servidor" });
     }
   },
 
@@ -94,10 +95,9 @@ export const usersController = {
       await usersService.deleteUser(id);
       return res.status(204).send();
     } catch (error: any) {
-      if (error.message === "Usuário não encontrado") {
-        return res.status(404).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res
+        .status(error.code || 500)
+        .json({ error: error.message || "Erro interno do servidor" });
     }
   },
 };
