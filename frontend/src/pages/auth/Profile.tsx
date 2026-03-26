@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Eye, EyeOff, KeyRound, Settings, Upload, UserRound } from "lucide-react";
+import { Camera, Eye, EyeOff, KeyRound, Settings, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import type { User } from "../../types";
 
