@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   role: "ADMIN" | "USER";
+  avatar?: string;
 }
 
 export interface UserForm {

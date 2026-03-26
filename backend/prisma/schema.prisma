@@ -25,15 +25,16 @@ enum MovementType {
 }
 
 model User {
-  id              Int              @id @default(autoincrement())
-  name            String
-  email           String           @unique
-  password        String
-  role            Role             @default(USER)
-  createdAt       DateTime         @default(now()) @map("created_at")
-  
-  sales           Sale[]
-  stockMovements  StockMovement[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  avatar    String?
+
+  sales          Sale[]
+  stockMovements StockMovement[]
 
   @@map("users")
 }
@@ -47,18 +48,18 @@ model Category {
 }
 
 model Product {
-  id          Int             @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
-  price       Decimal         @db.Decimal(10, 2)
-  stock       Int             @default(0)
-  sku         String          @unique
-  categoryId  Int             @map("category_id")
-  createdAt   DateTime        @default(now()) @map("created_at")
-  
-  category        Category        @relation(fields: [categoryId], references: [id])
-  saleItems       SaleItem[]
-  stockMovements  StockMovement[]
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  sku         String   @unique
+  categoryId  Int      @map("category_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  category       Category        @relation(fields: [categoryId], references: [id])
+  saleItems      SaleItem[]
+  stockMovements StockMovement[]
 
   @@map("products")
 }
@@ -70,8 +71,8 @@ model Customer {
   phone    String
   document String  @unique
   address  String?
-  
-  sales    Sale[]
+
+  sales Sale[]
 
   @@map("customers")
 }
@@ -83,10 +84,10 @@ model Sale {
   total      Decimal    @db.Decimal(10, 2)
   status     SaleStatus @default(PENDING)
   createdAt  DateTime   @default(now()) @map("created_at")
-  
-  customer   Customer   @relation(fields: [customerId], references: [id])
-  user       User       @relation(fields: [userId], references: [id])
-  items      SaleItem[]
+
+  customer Customer   @relation(fields: [customerId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  items    SaleItem[]
 
   @@map("sales")
 }
@@ -98,9 +99,9 @@ model SaleItem {
   quantity  Int
   unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
   subtotal  Decimal @db.Decimal(10, 2)
-  
-  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
   @@map("sale_items")
 }
@@ -113,9 +114,9 @@ model StockMovement {
   reason    String
   userId    Int          @map("user_id")
   createdAt DateTime     @default(now()) @map("created_at")
-  
-  product   Product      @relation(fields: [productId], references: [id])
-  user      User         @relation(fields: [userId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 
   @@map("stock_movements")
 }

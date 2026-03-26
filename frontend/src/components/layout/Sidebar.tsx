@@ -59,9 +59,9 @@ export function Sidebar() {
   ]
 
   const optionsMenu = [
-    { label: 'Profile', path: '/profile', icon: <User className="w-5 h-5" /> },
-    { label: 'Billing', path: '/billing', icon: <CreditCard className="w-5 h-5" /> },
-    { label: 'Logout', path: '', onClick: () => { logout() }, icon: <LogOut className="w-5 h-5" /> },
+    { label: 'Profile', path: '/profile', onClick: () => { setIsExpanded(false) }, icon: <User className="w-5 h-5" /> },
+    { label: 'Billing', path: '/billing', onClick: () => { setIsExpanded(false) }, icon: <CreditCard className="w-5 h-5" /> },
+    { label: 'Logout', path: '', onClick: () => { logout(); setIsExpanded(false) }, icon: <LogOut className="w-5 h-5" /> },
   ]
 
   return (
@@ -119,17 +119,17 @@ export function Sidebar() {
                       <TooltipProvider key={index}>
                         <Tooltip delayDuration={100}>
                           <TooltipTrigger>
-                            <Link to={redirect} className="w-full h-10">
+                            <Link to={redirect} onClick={() => setIsExpanded(false)} className="w-full h-10">
                               <li
                                 className={`
-                            w-full h-full flex items-center
-                            ${optionActive ? `bg-color-primary-active dark:bg-color-primary-active` : ''}
-                            ${optionActive ? `text-color-text-inverse dark:text-color-text-primary` : 'text-color-text-primary dark:text-color-text-primary'}
-                            hover:bg-color-primary-hover dark:hover:bg-color-primary-hover
-                            hover:text-color-text-inverse dark:hover:text-color-text-primary
-                            transition-colors rounded-lg cursor-pointer
-                            gap-2 p-2
-                          `}
+                                  w-full h-full flex items-center
+                                  ${optionActive ? `bg-color-primary-active dark:bg-color-primary-active` : ''}
+                                  ${optionActive ? `text-color-text-inverse dark:text-color-text-primary` : 'text-color-text-primary dark:text-color-text-primary'}
+                                  hover:bg-color-primary-hover dark:hover:bg-color-primary-hover
+                                  hover:text-color-text-inverse dark:hover:text-color-text-primary
+                                  transition-colors rounded-lg cursor-pointer
+                                  gap-2 p-2
+                                `}
                               >
                                 <div>
                                   {item.icon}
@@ -167,7 +167,11 @@ export function Sidebar() {
                     bg-color-surface 
                     text-color-text-primary
                     p-1 font-bold select-none">
-                            {initials}
+                            {user?.avatar ? (
+                              <img src={user?.avatar} alt="Avatar do usuário" className="w-10 h-10 rounded-full object-cover" />
+                            ) : (
+                              initials
+                            )}
                           </div>
                           <div className="w-full flex flex-col truncate">
                             <p className="truncate" title={user?.name}>
@@ -204,7 +208,7 @@ export function Sidebar() {
                           </DropdownMenuLabel>
                           {
                             optionsMenu.map((option, index) => (
-                              <Link key={index} to={option.path} className="w-full h-10">
+                              <Link key={index} onClick={() => setIsExpanded(false)} to={option.path} className="w-full h-10">
                                 <DropdownMenuItem className="text-text 
                         bg-color-surface 
                         hover:bg-color-primary 
@@ -225,7 +229,7 @@ export function Sidebar() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   ) : (
-                    <div className="w-full h-10 
+                    <div className="w-10 h-10 
               flex items-center justify-center 
               rounded-lg 
               bg-color-surface 
@@ -233,10 +237,15 @@ export function Sidebar() {
               hover:text-color-text-inverse
               dark:hover:text-color-text-primary
               text-color-text-primary 
-              p-1 
               font-bold 
+              rounded-full
+              overflow-hidden
               select-none">
-                      {initials}
+                      {user?.avatar ? (
+                        <img src={user?.avatar} alt="Avatar do usuário" className="w-full h-full object-cover" />
+                      ) : (
+                        initials
+                      )}
                     </div>
                   )}
                 </div>
@@ -332,7 +341,7 @@ export function Sidebar() {
                     <TooltipProvider key={index}>
                       <Tooltip delayDuration={100}>
                         <TooltipTrigger>
-                          <Link to={redirect} className="w-full h-[10px]">
+                          <Link to={redirect} onClick={() => setIsExpanded(false)} className="w-full h-[10px]">
                             <li
                               className={`
                               w-full h-10 flex items-center
@@ -366,21 +375,28 @@ export function Sidebar() {
                   <DropdownMenu >
                     <DropdownMenuTrigger asChild>
                       <Card className="w-full h-full 
-                  flex items-start flex-row gap-2 
-                  rounded-lg shadow-none p-2 
-                  border-color-border-default 
-                  bg-color-surface hover:bg-color-primary-hover 
-                  text-color-text-primary hover:text-color-text-inverse 
-                  dark:text-color-text-primary dark:hover:text-color-text-primary
-                  transition-colors 
-                  cursor-pointer">
+                        flex items-start flex-row gap-2 
+                        rounded-lg shadow-none p-2 
+                        border-color-border-default 
+                        bg-color-surface hover:bg-color-primary-hover 
+                        text-color-text-primary hover:text-color-text-inverse 
+                        dark:text-color-text-primary dark:hover:text-color-text-primary
+                        transition-colors 
+                        cursor-pointer">
                         <div className="w-12 h-10 
-                    flex items-center justify-center 
-                    rounded-full 
-                    bg-color-surface 
-                    text-color-text-primary
-                    p-1 font-bold select-none">
-                          {initials}
+                          flex items-center justify-center 
+                          rounded-full 
+                          bg-color-surface 
+                          text-color-text-primary
+                          font-bold 
+                          rounded-full
+                          overflow-hidden
+                          select-none">
+                          {user?.avatar ? (
+                            <img src={user?.avatar} alt="Avatar do usuário" className="w-full h-full object-cover" />
+                          ) : (
+                            initials
+                          )}
                         </div>
                         <div className="w-full flex flex-col truncate">
                           <p className="truncate" title={user?.name}>
@@ -438,7 +454,7 @@ export function Sidebar() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <div className="w-full h-10 
+                  <div className="w-10 h-10 
               flex items-center justify-center 
               rounded-lg 
               bg-color-surface 
@@ -446,10 +462,15 @@ export function Sidebar() {
               hover:text-color-text-inverse
               dark:hover:text-color-text-primary
               text-color-text-primary 
-              p-1 
               font-bold 
+              rounded-full
+              overflow-hidden
               select-none">
-                    {initials}
+                    {user?.avatar ? (
+                      <img src={user?.avatar} alt="Avatar do usuário" className="w-full h-full object-cover" />
+                    ) : (
+                      initials
+                    )}
                   </div>
                 )}
               </div>

@@ -95,13 +95,14 @@ export const userService = {
     return response.data;
   },
 
-  updateProfile: async (name: string, email: string) => {
+  updateProfile: async (name: string, email: string, avatar: string) => {
     const response = await api.put<{
       id: number;
       name: string;
       email: string;
       role: string;
-    }>("/users/me", { name, email });
+      avatar?: string;
+    }>("/users/me", { name, email, avatar });
     return response.data;
   },
 

@@ -9,7 +9,12 @@ export const usersService = {
     return { id: user.id, name: user.name, email: user.email, role: user.role };
   },
 
-  async updateProfile(userId: number, name: string, email: string) {
+  async updateProfile(
+    userId: number,
+    name: string,
+    email: string,
+    avatar: string,
+  ) {
     const emailTaken = await prisma.user.findFirst({
       where: { email, NOT: { id: userId } },
     });
@@ -17,9 +22,15 @@ export const usersService = {
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email },
+      data: { name, email, avatar },
     });
-    return { id: user.id, name: user.name, email: user.email, role: user.role };
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    };
   },
 
   async changePassword(

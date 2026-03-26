@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, KeyRound, Settings, UserRound } from "lucide-react";
+import { Camera, Eye, EyeOff, KeyRound, Settings, Upload, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import type { User } from "../../types";
 
@@ -13,7 +13,7 @@ export function ProfilePage() {
   const { user, updateUser } = useAuth();
 
   // --- Perfil ---
-  const [profileForm, setProfileForm] = useState({ name: "", email: "" });
+  const [profileForm, setProfileForm] = useState({ name: "", email: "", avatar: "" });
   const [profileLoading, setProfileLoading] = useState(false);
 
   // --- Senha ---
@@ -26,10 +26,28 @@ export function ProfilePage() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState<User | null>(user);
+
+  const handleImgPerfil = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024 * 1) {
+        toast.error("Imagem muito grande. O tamanho máximo é 1MB.");
+        e.target.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUserInfo((p) => p ? { ...p, avatar: reader.result as string } : null);
+        setProfileForm((p) => ({ ...p, avatar: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 
   useEffect(() => {
     if (user) {
-      setProfileForm({ name: user.name, email: user.email });
+      setProfileForm({ name: user.name, email: user.email, avatar: user.avatar ?? "" });
     }
   }, [user]);
 
@@ -40,7 +58,12 @@ export function ProfilePage() {
     }
     try {
       setProfileLoading(true);
-      const updated = await userService.updateProfile(profileForm.name.trim(), profileForm.email.trim());
+      const objSend = {
+        name: profileForm.name.trim(),
+        email: profileForm.email.trim(),
+        avatar: profileForm.avatar,
+      }
+      const updated = await userService.updateProfile(objSend.name, objSend.email, objSend.avatar);
       updateUser(updated as User);
       toast.success("Perfil atualizado com sucesso.");
     } catch (error: any) {
@@ -96,6 +119,35 @@ export function ProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-2">
+              <Label className="text-color-text-primary">Avatar</Label>
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative group">
+                  {userInfo?.avatar ? (
+                    <img src={userInfo?.avatar} alt="Avatar do usuário" className="w-20 h-20 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-color-primary flex items-center justify-center text-color-text-primary text-2xl font-bold">
+                      {userInfo?.name.charAt(0).toUpperCase()}
+                    </div>)}
+                  <div className="absolute inset-0 rounded-full bg-gray-700 opacity-0 group-hover:opacity-50 transition-opacity pointer-events-none" />
+                  <Button
+                    onClick={() => document.getElementById("avatarInput")?.click()}
+                    className="absolute inset-0 w-full h-full rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-transparent hover:bg-transparent text-white shadow-none text-white"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="hidden">
+                  <Input
+                    type="file"
+                    id="avatarInput"
+                    accept="image/*"
+                    onChange={handleImgPerfil}
+                    className="bg-color-surface border-color-border-default text-color-text-primary"
+                  />
+                </div>
+              </div>
+            </div>
             <div className="flex flex-col gap-2">
               <Label className="text-color-text-primary">Nome</Label>
               <Input
@@ -127,7 +179,7 @@ export function ProfilePage() {
               <Button
                 onClick={handleProfileSave}
                 disabled={profileLoading}
-                className="bg-color-primary hover:bg-color-primary-hover text-color-text-inverse"
+                className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
               >
                 {profileLoading ? "Salvando..." : "Salvar alterações"}
               </Button>
@@ -208,7 +260,7 @@ export function ProfilePage() {
               <Button
                 onClick={handlePasswordSave}
                 disabled={passwordLoading}
-                className="bg-color-primary hover:bg-color-primary-hover text-color-text-inverse"
+                className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
               >
                 {passwordLoading ? "Alterando..." : "Alterar senha"}
               </Button>

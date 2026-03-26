@@ -15,11 +15,27 @@ export const usersController = {
 
   async updateProfile(req: Request, res: Response) {
     try {
-      const { name, email } = req.body;
-      if (!name || !email) {
-        return res.status(400).json({ error: "Nome e email são obrigatórios" });
+      const { name, email, avatar } = req.body;
+      if (!name || !email || !avatar) {
+        return res
+          .status(400)
+          .json({ error: "Nome, email e avatar são obrigatórios" });
       }
-      const user = await usersService.updateProfile(req.userId!, name, email);
+      const isValidBase64 =
+        /^data:image\/(png|jpg|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(
+          avatar,
+        );
+      if (!isValidBase64) {
+        return res
+          .status(400)
+          .json({ error: "Avatar deve ser uma imagem em base64 válida" });
+      }
+      const user = await usersService.updateProfile(
+        req.userId!,
+        name,
+        email,
+        avatar,
+      );
       return res.json(user);
     } catch (error: any) {
       return res
