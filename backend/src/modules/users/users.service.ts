@@ -6,7 +6,7 @@ export const usersService = {
   async getProfile(userId: number) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw { code: 404, message: "Usuário não encontrado" };
-    return { id: user.id, name: user.name, email: user.email, role: user.role };
+    return { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar };
   },
 
   async updateProfile(
@@ -58,6 +58,7 @@ export const usersService = {
         name: true,
         email: true,
         role: true,
+        avatar: true,
       },
     });
     return users;

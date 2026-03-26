@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { authService } from "./auth.service";
-import { usersService } from "../users/users.service";
 
 export const authController = {
   async register(req: Request, res: Response) {
@@ -33,20 +32,8 @@ export const authController = {
     }
   },
 
-  async verify(req: Request, res: Response) {
-    try {
-      const user = await usersService.getProfile(req.userId!);
-      return res.status(200).json({
-        valid: true,
-        userId: user.id,
-        role: user.role,
-      });
-    } catch {
-      return res.status(404).json({
-        valid: false,
-        error: "Usuário não encontrado",
-      });
-    }
+  async verify(_req: Request, res: Response) {
+    return res.status(200).json({ valid: true });
   },
 
   async login(req: Request, res: Response) {

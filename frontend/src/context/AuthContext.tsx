@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode, useLayoutEffect } from 'react';
 import type { User, LoginForm, RegisterForm, LoginResponse, RegisterResponse } from '../types';
-import { authService } from '../services/api.ts';
+import { authService, userService } from '../services/api.ts';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,13 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (storedUser && storedToken) {
       authService.verify()
-        .then((res) => {
-          const parsed: User = JSON.parse(storedUser);
-          if (res.data.role !== parsed.role) {
-            parsed.role = res.data.role;
-            localStorage.setItem('user', JSON.stringify(parsed));
-          }
-          setUser(parsed);
+        .then(() => userService.getProfile())
+        .then((freshUser) => {
+          localStorage.setItem('user', JSON.stringify(freshUser));
+          setUser(freshUser as User);
         })
         .catch(() => {
           localStorage.removeItem('token');
@@ -65,9 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await authService.login(data);
 
     localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
 
-    setUser(response.data.user);
+    const freshUser = await userService.getProfile();
+    localStorage.setItem('user', JSON.stringify(freshUser));
+    setUser(freshUser as User);
+
     return response.data;
   };
 
@@ -85,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = (updated: User) => {
     setUser(updated);
+    console.log('updated', updated);
     localStorage.setItem('user', JSON.stringify(updated));
   };
 

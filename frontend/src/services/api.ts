@@ -61,11 +61,7 @@ export const authService = {
   },
 
   verify: async () => {
-    return await api.get<{
-      valid: boolean;
-      userId: number;
-      role: "ADMIN" | "USER";
-    }>("/auth/verify");
+    return await api.get<{ valid: boolean }>("/auth/verify");
   },
 };
 
@@ -91,6 +87,7 @@ export const userService = {
       name: string;
       email: string;
       role: string;
+      avatar?: string;
     }>("/users/me");
     return response.data;
   },

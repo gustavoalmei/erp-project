@@ -127,6 +127,7 @@ export function Users() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead></TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Perfil</TableHead>
@@ -149,6 +150,15 @@ export function Users() {
               ) : (
                 users.map((user) => (
                   <TableRow key={user.id}>
+                    <TableCell className="text-color-text-primary font-medium">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt="Avatar do usuário" className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-color-primary flex items-center justify-center text-color-text-primary text-lg font-bold">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-color-text-primary font-medium">{user.name}</TableCell>
                     <TableCell className="text-color-text-primary">{user.email}</TableCell>
                     <TableCell className="text-color-text-primary">
