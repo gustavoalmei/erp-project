@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useTheme } from '../theme-provider'
+import { useTheme } from '../../hooks/use-theme.ts'
 import { useAuth } from '@/hooks/useAuth'
 import { Card } from '../ui/card'
 import {
