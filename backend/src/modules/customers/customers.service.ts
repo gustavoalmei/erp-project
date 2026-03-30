@@ -1,22 +1,22 @@
-import { prisma } from "../../utils/prisma";
+import { prisma } from '../../utils/prisma'
 
 export const customersService = {
   async allCustomers() {
     return await prisma.customer.findMany({
-      orderBy: { name: "asc" },
-    });
+      orderBy: { name: 'asc' },
+    })
   },
 
   async getCustomerById(id: number) {
     const customer = await prisma.customer.findUnique({
       where: { id },
-    });
+    })
 
     if (!customer) {
-      throw new Error("Cliente não encontrado");
+      throw new Error('Cliente não encontrado')
     }
 
-    return customer;
+    return customer
   },
 
   async createCustomer(
@@ -28,18 +28,18 @@ export const customersService = {
   ) {
     const emailExists = await prisma.customer.findUnique({
       where: { email },
-    });
+    })
 
     if (emailExists) {
-      throw new Error("Email já cadastrado");
+      throw new Error('Email já cadastrado')
     }
 
     const documentExists = await prisma.customer.findUnique({
       where: { document },
-    });
+    })
 
     if (documentExists) {
-      throw new Error("Documento já cadastrado");
+      throw new Error('Documento já cadastrado')
     }
 
     return await prisma.customer.create({
@@ -50,7 +50,7 @@ export const customersService = {
         document,
         address,
       },
-    });
+    })
   },
 
   async updateCustomer(
@@ -63,29 +63,29 @@ export const customersService = {
   ) {
     const customer = await prisma.customer.findUnique({
       where: { id },
-    });
+    })
 
     if (!customer) {
-      throw new Error("Cliente não encontrado");
+      throw new Error('Cliente não encontrado')
     }
 
     if (email !== customer.email) {
       const emailExists = await prisma.customer.findUnique({
         where: { email },
-      });
+      })
 
       if (emailExists) {
-        throw new Error("Email já está em uso");
+        throw new Error('Email já está em uso')
       }
     }
 
     if (document !== customer.document) {
       const documentExists = await prisma.customer.findUnique({
         where: { document },
-      });
+      })
 
       if (documentExists) {
-        throw new Error("Documento já está em uso");
+        throw new Error('Documento já está em uso')
       }
     }
 
@@ -98,34 +98,34 @@ export const customersService = {
         document,
         address,
       },
-    });
+    })
   },
 
   async deleteCustomer(id: number) {
     const customer = await prisma.customer.findUnique({
       where: { id },
       include: { sales: true },
-    });
+    })
 
     if (!customer) {
-      throw new Error("Cliente não encontrado");
+      throw new Error('Cliente não encontrado')
     }
 
     if (customer.sales.length > 0) {
-      throw new Error("Cliente possui vendas vinculadas");
+      throw new Error('Cliente possui vendas vinculadas')
     }
 
     await prisma.customer.delete({
       where: { id },
-    });
+    })
 
-    return { message: "Cliente deletado com sucesso" };
+    return { message: 'Cliente deletado com sucesso' }
   },
 
   async topCustomers(limit: number = 10) {
     // Buscar vendas agrupadas por cliente
     const topCustomers = await prisma.sale.groupBy({
-      by: ["customerId"],
+      by: ['customerId'],
       _sum: {
         total: true, // ← Soma o valor total gasto
       },
@@ -134,19 +134,19 @@ export const customersService = {
       },
       where: {
         status: {
-          not: "CANCELLED", // ← Ignora vendas canceladas
+          not: 'CANCELLED', // ← Ignora vendas canceladas
         },
       },
       orderBy: {
         _sum: {
-          total: "desc", // ← Ordena por quem gastou mais
+          total: 'desc', // ← Ordena por quem gastou mais
         },
       },
       take: limit,
-    });
+    })
 
     // Buscar detalhes dos clientes
-    const customerIds = topCustomers.map((item) => item.customerId);
+    const customerIds = topCustomers.map((item) => item.customerId)
 
     const customers = await prisma.customer.findMany({
       where: {
@@ -156,16 +156,16 @@ export const customersService = {
         id: true,
         name: true,
       },
-    });
+    })
 
     // Combinar dados
     return topCustomers.map((item) => {
-      const customer = customers.find((c) => c.id === item.customerId);
+      const customer = customers.find((c) => c.id === item.customerId)
       return {
         ...customer,
         totalSpent: Number(item._sum.total) || 0, // Total gasto
         totalPurchases: item._count.id, // Quantidade de compras
-      };
-    });
+      }
+    })
   },
-};
+}

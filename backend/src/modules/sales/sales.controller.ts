@@ -1,182 +1,183 @@
-import { Request, Response } from "express";
-import { salesService } from "./sales.service";
+import type { Request, Response } from 'express'
+import { salesService } from './sales.service'
 
 export const salesController = {
   async create(req: Request, res: Response) {
     try {
-      const { customerId, items } = req.body;
-      const userId = req.userId!;
+      const { customerId, items } = req.body
+      const userId = req.userId!
 
       // Validações
       if (!customerId || !items || items.length === 0) {
         return res.status(400).json({
-          error: "customerId e items são obrigatórios",
-        });
+          error: 'customerId e items são obrigatórios',
+        })
       }
 
       // Validar cada item
       for (const item of items) {
         if (!item.productId || !item.quantity || item.quantity <= 0) {
           return res.status(400).json({
-            error: "Cada item precisa de productId e quantity > 0",
-          });
+            error: 'Cada item precisa de productId e quantity > 0',
+          })
         }
       }
 
       // Converter tipos
-      const customerIdNumber = Number(customerId);
-      const itemsConverted = items.map((item: any) => ({
+      const customerIdNumber = Number(customerId)
+      const itemsConverted = items.map((item: { productId: number; quantity: number }) => ({
         productId: Number(item.productId),
         quantity: Number(item.quantity),
-      }));
+      }))
 
-      await salesService.createSale(customerIdNumber, itemsConverted, userId);
+      await salesService.createSale(customerIdNumber, itemsConverted, userId)
 
       return res.status(201).json({
-        message: "Venda criada com sucesso",
-      });
-    } catch (error: any) {
-      if (error.message === "Cliente não encontrado") {
-        return res.status(404).json({ error: error.message });
+        message: 'Venda criada com sucesso',
+      })
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'Cliente não encontrado') {
+        return res.status(404).json({ error: error.message })
       }
       if (
-        error.message.includes("Produto") &&
-        error.message.includes("não encontrado")
+        error instanceof Error &&
+        error.message.includes('Produto') &&
+        error.message.includes('não encontrado')
       ) {
-        return res.status(404).json({ error: error.message });
+        return res.status(404).json({ error: error.message })
       }
-      if (error.message.includes("Estoque insuficiente")) {
-        return res.status(400).json({ error: error.message });
+      if (error instanceof Error && error.message.includes('Estoque insuficiente')) {
+        return res.status(400).json({ error: error.message })
       }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async list(req: Request, res: Response) {
     try {
-      const sales = await salesService.listSales();
-      return res.status(200).json(sales);
-    } catch (error: any) {
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      const sales = await salesService.listSales()
+      return res.status(200).json(sales)
+    } catch {
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async getById(req: Request, res: Response) {
     try {
-      const id = Number(req.params.id);
+      const id = Number(req.params.id)
 
       if (isNaN(id)) {
-        return res.status(400).json({ error: "ID inválido" });
+        return res.status(400).json({ error: 'ID inválido' })
       }
 
-      const sale = await salesService.getSaleById(id);
-      return res.status(200).json(sale);
-    } catch (error: any) {
-      if (error.message === "Venda não encontrada") {
-        return res.status(404).json({ error: error.message });
+      const sale = await salesService.getSaleById(id)
+      return res.status(200).json(sale)
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'Venda não encontrada') {
+        return res.status(404).json({ error: error.message })
       }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async updateStatus(req: Request, res: Response) {
     try {
-      const id = Number(req.params.id);
-      const { status } = req.body;
+      const id = Number(req.params.id)
+      const { status } = req.body
 
       if (isNaN(id)) {
-        return res.status(400).json({ error: "ID inválido" });
+        return res.status(400).json({ error: 'ID inválido' })
       }
 
       if (!status) {
-        return res.status(400).json({ error: "Status é obrigatório" });
+        return res.status(400).json({ error: 'Status é obrigatório' })
       }
 
-      await salesService.updateSaleStatus(id, status);
+      await salesService.updateSaleStatus(id, status)
 
       return res.status(200).json({
-        message: "Status atualizado com sucesso",
-      });
-    } catch (error: any) {
-      if (error.message === "Venda não encontrada") {
-        return res.status(404).json({ error: error.message });
+        message: 'Status atualizado com sucesso',
+      })
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'Venda não encontrada') {
+        return res.status(404).json({ error: error.message })
       }
-      if (error.message.includes("Status inválido")) {
-        return res.status(400).json({ error: error.message });
+      if (error instanceof Error && error.message.includes('Status inválido')) {
+        return res.status(400).json({ error: error.message })
       }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async cancel(req: Request, res: Response) {
     try {
-      const id = Number(req.params.id);
-      const userId = req.userId!;
+      const id = Number(req.params.id)
+      const userId = req.userId!
 
       if (isNaN(id)) {
-        return res.status(400).json({ error: "ID inválido" });
+        return res.status(400).json({ error: 'ID inválido' })
       }
 
-      await salesService.cancelSale(id, userId);
+      await salesService.cancelSale(id, userId)
 
       return res.status(200).json({
-        message: "Venda cancelada com sucesso",
-      });
-    } catch (error: any) {
-      if (error.message === "Venda não encontrada") {
-        return res.status(404).json({ error: error.message });
+        message: 'Venda cancelada com sucesso',
+      })
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'Venda não encontrada') {
+        return res.status(404).json({ error: error.message })
       }
-      if (error.message === "Venda já está cancelada") {
-        return res.status(400).json({ error: error.message });
+      if (error instanceof Error && error.message === 'Venda já está cancelada') {
+        return res.status(400).json({ error: error.message })
       }
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async getTotalRevenue(req: Request, res: Response) {
     try {
-      const data = await salesService.getTotalRevenue();
-      return res.status(200).json(data);
-    } catch (error: any) {
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      const data = await salesService.getTotalRevenue()
+      return res.status(200).json(data)
+    } catch {
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async getStats(req: Request, res: Response) {
     try {
-      const data = await salesService.getStats();
-      return res.status(200).json(data);
-    } catch (error: any) {
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      const data = await salesService.getStats()
+      return res.status(200).json(data)
+    } catch {
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async getMonthlyRevenue(req: Request, res: Response) {
     try {
-      const year = req.query.year ? Number(req.query.year) : undefined;
+      const year = req.query.year ? Number(req.query.year) : undefined
 
-      const data = await salesService.getMonthlyRevenue(year);
-      return res.status(200).json(data);
-    } catch (error: any) {
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      const data = await salesService.getMonthlyRevenue(year)
+      return res.status(200).json(data)
+    } catch {
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async getTodaySales(req: Request, res: Response) {
     try {
-      const data = await salesService.getTodaySales();
-      return res.status(200).json(data);
-    } catch (error: any) {
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      const data = await salesService.getTodaySales()
+      return res.status(200).json(data)
+    } catch {
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
 
   async getPendingSales(req: Request, res: Response) {
     try {
-      const data = await salesService.getPendingSales();
-      return res.status(200).json(data);
-    } catch (error: any) {
-      return res.status(500).json({ error: "Erro interno do servidor" });
+      const data = await salesService.getPendingSales()
+      return res.status(200).json(data)
+    } catch {
+      return res.status(500).json({ error: 'Erro interno do servidor' })
     }
   },
-};
+}
