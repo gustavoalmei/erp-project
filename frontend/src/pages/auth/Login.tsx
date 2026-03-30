@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react'
 import {
   Card,
   CardContent,
@@ -6,35 +6,33 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "../../components/ui/input-group"
-import { Label } from "../../components/ui/label"
-import { Separator } from "../../components/ui/separator"
-import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+} from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '../../components/ui/input-group'
+import { Label } from '../../components/ui/label'
+import { Separator } from '../../components/ui/separator'
+import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
-  const { login, showToast } = useAuth();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
+  const { login, showToast } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await login({ email, password }).then(() => {
-      showToast({ type: "success", message: "Login realizado com sucesso" });
-      navigate('/');
-    }).catch((error) => {
-      showToast({ type: "error", message: error.response.data.error });
-    });
+    e.preventDefault()
+    await login({ email, password })
+      .then(() => {
+        showToast({ type: 'success', message: 'Login realizado com sucesso' })
+        navigate('/')
+      })
+      .catch((error) => {
+        showToast({ type: 'error', message: error.response.data.error })
+      })
   }
   return (
     <div className="min-h-svh grid lg:grid-cols-[1fr_480px]">
@@ -68,7 +66,7 @@ export function LoginPage() {
                     <InputGroupInput
                       id="password"
                       placeholder="Digite sua senha"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -76,7 +74,8 @@ export function LoginPage() {
                     <InputGroupAddon
                       align="inline-end"
                       className="cursor-pointer"
-                      onClick={() => setShowPassword(!showPassword)}>
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
                       {showPassword ? <EyeOff /> : <Eye />}
                     </InputGroupAddon>
                   </InputGroup>
@@ -86,7 +85,8 @@ export function LoginPage() {
             <CardFooter className="flex-col gap-2">
               <Button
                 type="submit"
-                className="w-full bg-neutral-400 rounded-xl text-white hover:bg-neutral-500">
+                className="w-full bg-neutral-400 rounded-xl text-white hover:bg-neutral-500"
+              >
                 Login
               </Button>
               <Separator className="bg-neutral-200" />
@@ -94,7 +94,10 @@ export function LoginPage() {
                 type="button"
                 variant="outline"
                 className="w-full rounded-xl text-white hover:bg-neutral-700"
-                onClick={() => { navigate('/register') }}>
+                onClick={() => {
+                  navigate('/register')
+                }}
+              >
                 Criar conta
               </Button>
             </CardFooter>
@@ -102,5 +105,5 @@ export function LoginPage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

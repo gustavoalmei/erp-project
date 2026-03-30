@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { categoryService } from "@/services/api";
-import type { Category } from "../../types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from 'react'
+import { categoryService } from '@/services/api'
+import type { Category } from '../../types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -12,111 +12,112 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Pencil, Plus, Search, Tags, Trash2 } from "lucide-react";
-import { toast } from "react-toastify";
+} from '@/components/ui/dialog'
+import { Pencil, Plus, Search, Tags, Trash2 } from 'lucide-react'
+import { toast } from 'react-toastify'
 
 export function Categories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [filtered, setFiltered] = useState<Category[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([])
+  const [filtered, setFiltered] = useState<Category[]>([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
   // Modal de criação/edição
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<Category | null>(null);
-  const [formName, setFormName] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<Category | null>(null)
+  const [formName, setFormName] = useState('')
+  const [saving, setSaving] = useState(false)
 
   // Modal de confirmação de exclusão
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleting, setDeleting] = useState<Category | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState<Category | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const load = async () => {
     try {
-      setLoading(true);
-      const data = await categoryService.getAll();
-      setCategories(data.sort((a, b) => a.name.localeCompare(b.name)));
-      setFiltered(data.sort((a, b) => a.name.localeCompare(b.name)));
+      setLoading(true)
+      const data = await categoryService.getAll()
+      setCategories(data.sort((a, b) => a.name.localeCompare(b.name)))
+      setFiltered(data.sort((a, b) => a.name.localeCompare(b.name)))
     } catch {
-      toast.error("Erro ao carregar categorias.");
+      toast.error('Erro ao carregar categorias.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    load();
-  }, []);
+    load()
+  }, [])
 
   useEffect(() => {
-    const q = search.toLowerCase();
-    setFiltered(categories.filter((c) => c.name.toLowerCase().includes(q)));
-  }, [search, categories]);
+    const q = search.toLowerCase()
+    setFiltered(categories.filter((c) => c.name.toLowerCase().includes(q)))
+  }, [search, categories])
 
   const openCreate = () => {
-    setEditing(null);
-    setFormName("");
-    setFormOpen(true);
-  };
+    setEditing(null)
+    setFormName('')
+    setFormOpen(true)
+  }
 
   const openEdit = (category: Category) => {
-    setEditing(category);
-    setFormName(category.name);
-    setFormOpen(true);
-  };
+    setEditing(category)
+    setFormName(category.name)
+    setFormOpen(true)
+  }
 
   const handleSave = async () => {
     if (!formName.trim()) {
-      toast.error("Nome é obrigatório.");
-      return;
+      toast.error('Nome é obrigatório.')
+      return
     }
     try {
-      setSaving(true);
+      setSaving(true)
       if (editing) {
-        await categoryService.update(editing.id, formName.trim());
-        toast.success("Categoria atualizada com sucesso.");
+        await categoryService.update(editing.id, formName.trim())
+        toast.success('Categoria atualizada com sucesso.')
       } else {
-        await categoryService.create(formName.trim());
-        toast.success("Categoria criada com sucesso.");
+        await categoryService.create(formName.trim())
+        toast.success('Categoria criada com sucesso.')
       }
-      setFormOpen(false);
-      load();
+      setFormOpen(false)
+      load()
     } catch {
-      toast.error("Erro ao salvar categoria.");
+      toast.error('Erro ao salvar categoria.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const openDelete = (category: Category) => {
-    setDeleting(category);
-    setDeleteOpen(true);
-  };
+    setDeleting(category)
+    setDeleteOpen(true)
+  }
 
   const handleDelete = async () => {
-    if (!deleting) return;
+    if (!deleting) return
     try {
-      setDeleteLoading(true);
-      await categoryService.delete(deleting.id);
-      toast.success("Categoria excluída com sucesso.");
-      setDeleteOpen(false);
-      setDeleting(null);
-      load();
-    } catch (error: any) {
-      toast.error(error.response.data.error);
+      setDeleteLoading(true)
+      await categoryService.delete(deleting.id)
+      toast.success('Categoria excluída com sucesso.')
+      setDeleteOpen(false)
+      setDeleting(null)
+      load()
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } }
+      toast.error(axiosError.response?.data?.error)
     } finally {
-      setDeleteLoading(false);
+      setDeleteLoading(false)
     }
-  };
+  }
 
   return (
     <Card className="p-4 border-color-border-default cursor-default">
@@ -150,7 +151,7 @@ export function Categories() {
       <Card className="bg-color-bg-secondary border-color-border-default shadow-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-color-text-primary text-base">
-            {loading ? "Carregando..." : `${filtered.length} categorias`}
+            {loading ? 'Carregando...' : `${filtered.length} categorias`}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -177,7 +178,9 @@ export function Categories() {
               ) : (
                 filtered.map((category) => (
                   <TableRow key={category.id} className="border-color-border-default">
-                    <TableCell className="text-color-text-primary font-medium">{category.name}</TableCell>
+                    <TableCell className="text-color-text-primary font-medium">
+                      {category.name}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -211,7 +214,7 @@ export function Categories() {
         <DialogContent className="bg-color-bg-secondary border-color-border-default text-color-text-primary">
           <DialogHeader>
             <DialogTitle className="text-color-text-primary">
-              {editing ? "Editar Categoria" : "Nova Categoria"}
+              {editing ? 'Editar Categoria' : 'Nova Categoria'}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
@@ -221,7 +224,7 @@ export function Categories() {
                 placeholder="Nome da categoria"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                 className="bg-color-surface border-color-border-default text-color-text-primary"
               />
             </div>
@@ -239,7 +242,7 @@ export function Categories() {
               disabled={saving}
               className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
             >
-              {saving ? "Salvando..." : "Salvar"}
+              {saving ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -252,8 +255,9 @@ export function Categories() {
             <DialogTitle className="text-color-text-primary">Excluir Categoria</DialogTitle>
           </DialogHeader>
           <p className="text-color-text-secondary">
-            Tem certeza que deseja excluir a categoria{" "}
-            <span className="font-semibold text-color-text-primary">"{deleting?.name}"</span>? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir a categoria{' '}
+            <span className="font-semibold text-color-text-primary">"{deleting?.name}"</span>? Esta
+            ação não pode ser desfeita.
           </p>
           <DialogFooter>
             <Button
@@ -268,11 +272,11 @@ export function Categories() {
               disabled={deleteLoading}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {deleteLoading ? "Excluindo..." : "Excluir"}
+              {deleteLoading ? 'Excluindo...' : 'Excluir'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
-  );
+  )
 }

@@ -1,16 +1,16 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
 
 export function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth()
 
   if (loading) {
-    return null;
+    return null
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />
   }
 
-  return children;
+  return children
 }

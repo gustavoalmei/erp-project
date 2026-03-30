@@ -1,55 +1,52 @@
-import { prisma } from "../../utils/prisma";
-import { MovementType } from "@prisma/client";
+import { prisma } from '../../utils/prisma'
+import { MovementType } from '@prisma/client'
+import type { SaleStatus } from '@prisma/client'
 
 interface CreateSaleItem {
-  productId: number;
-  quantity: number;
+  productId: number
+  quantity: number
 }
 
 export const salesService = {
-  async createSale(
-    customerId: number,
-    items: CreateSaleItem[],
-    userId: number,
-  ) {
+  async createSale(customerId: number, items: CreateSaleItem[], userId: number) {
     return await prisma.$transaction(async (tx) => {
       // 1. Validar cliente
       const customer = await tx.customer.findUnique({
         where: { id: customerId },
-      });
+      })
 
       if (!customer) {
-        throw new Error("Cliente não encontrado");
+        throw new Error('Cliente não encontrado')
       }
 
       // 2. Validar produtos e calcular valores
-      let totalSale = 0;
-      const saleItemsData = [];
+      let totalSale = 0
+      const saleItemsData = []
 
       for (const item of items) {
         const product = await tx.product.findUnique({
           where: { id: item.productId },
-        });
+        })
 
         if (!product) {
-          throw new Error(`Produto ${item.productId} não encontrado`);
+          throw new Error(`Produto ${item.productId} não encontrado`)
         }
 
         if (product.stock < item.quantity) {
           throw new Error(
             `Estoque insuficiente para ${product.name}. Disponível: ${product.stock}, Solicitado: ${item.quantity}`,
-          );
+          )
         }
 
-        const subtotal = Number(product.price) * item.quantity;
-        totalSale += subtotal;
+        const subtotal = Number(product.price) * item.quantity
+        totalSale += subtotal
 
         saleItemsData.push({
           productId: item.productId,
           quantity: item.quantity,
           unitPrice: product.price,
           subtotal: subtotal,
-        });
+        })
       }
 
       // 3. Criar a venda
@@ -58,9 +55,9 @@ export const salesService = {
           customerId,
           userId,
           total: totalSale,
-          status: "PENDING",
+          status: 'PENDING',
         },
-      });
+      })
 
       // 4. Criar itens, atualizar estoque e registrar movimentações
       for (const itemData of saleItemsData) {
@@ -73,7 +70,7 @@ export const salesService = {
             unitPrice: itemData.unitPrice,
             subtotal: itemData.subtotal,
           },
-        });
+        })
 
         // Atualizar estoque
         await tx.product.update({
@@ -83,7 +80,7 @@ export const salesService = {
               decrement: itemData.quantity,
             },
           },
-        });
+        })
 
         // Criar movimentação de estoque
         await tx.stockMovement.create({
@@ -94,7 +91,7 @@ export const salesService = {
             reason: `Venda #${sale.id}`,
             userId,
           },
-        });
+        })
       }
 
       // 5. Retornar venda completa
@@ -128,8 +125,8 @@ export const salesService = {
             },
           },
         },
-      });
-    });
+      })
+    })
   },
 
   async listSales() {
@@ -161,9 +158,9 @@ export const salesService = {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
-    });
+    })
   },
 
   async getSaleById(id: number) {
@@ -184,33 +181,33 @@ export const salesService = {
           },
         },
       },
-    });
+    })
 
     if (!sale) {
-      throw new Error("Venda não encontrada");
+      throw new Error('Venda não encontrada')
     }
 
-    return sale;
+    return sale
   },
 
   async updateSaleStatus(id: number, status: string) {
-    const validStatuses = ["PENDING", "COMPLETED", "CANCELLED"];
+    const validStatuses = ['PENDING', 'COMPLETED', 'CANCELLED']
 
     if (!validStatuses.includes(status)) {
-      throw new Error("Status inválido. Use: PENDING, COMPLETED ou CANCELLED");
+      throw new Error('Status inválido. Use: PENDING, COMPLETED ou CANCELLED')
     }
 
     const sale = await prisma.sale.findUnique({
       where: { id },
-    });
+    })
 
     if (!sale) {
-      throw new Error("Venda não encontrada");
+      throw new Error('Venda não encontrada')
     }
 
     return await prisma.sale.update({
       where: { id },
-      data: { status: status as any },
+      data: { status: status as SaleStatus },
       include: {
         customer: true,
         items: {
@@ -219,7 +216,7 @@ export const salesService = {
           },
         },
       },
-    });
+    })
   },
 
   async cancelSale(id: number, userId: number) {
@@ -227,14 +224,14 @@ export const salesService = {
       const sale = await tx.sale.findUnique({
         where: { id },
         include: { items: true },
-      });
+      })
 
       if (!sale) {
-        throw new Error("Venda não encontrada");
+        throw new Error('Venda não encontrada')
       }
 
-      if (sale.status === "CANCELLED") {
-        throw new Error("Venda já está cancelada");
+      if (sale.status === 'CANCELLED') {
+        throw new Error('Venda já está cancelada')
       }
 
       // Devolver estoque
@@ -246,7 +243,7 @@ export const salesService = {
               increment: item.quantity,
             },
           },
-        });
+        })
 
         // Registrar devolução
         await tx.stockMovement.create({
@@ -257,13 +254,13 @@ export const salesService = {
             reason: `Cancelamento venda #${sale.id}`,
             userId,
           },
-        });
+        })
       }
 
       // Atualizar status
       return await tx.sale.update({
         where: { id },
-        data: { status: "CANCELLED" },
+        data: { status: 'CANCELLED' },
         include: {
           customer: true,
           items: {
@@ -272,8 +269,8 @@ export const salesService = {
             },
           },
         },
-      });
-    });
+      })
+    })
   },
 
   async getTotalRevenue() {
@@ -283,14 +280,14 @@ export const salesService = {
       },
       where: {
         status: {
-          not: "CANCELLED", // Ignora vendas canceladas
+          not: 'CANCELLED', // Ignora vendas canceladas
         },
       },
-    });
+    })
 
     return {
       totalRevenue: Number(result._sum.total) || 0,
-    };
+    }
   },
 
   async getStats() {
@@ -301,34 +298,34 @@ export const salesService = {
           total: true,
         },
         where: {
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
         },
       }),
       // Quantidade de vendas
       prisma.sale.count({
         where: {
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
         },
       }),
-    ]);
+    ])
 
-    const totalRevenue = Number(totalResult._sum.total) || 0;
-    const totalSales = countResult;
-    const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+    const totalRevenue = Number(totalResult._sum.total) || 0
+    const totalSales = countResult
+    const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0
 
     return {
       totalRevenue,
       totalSales,
       averageTicket, // ← Ticket médio
-    };
+    }
   },
 
   async getMonthlyRevenue(year?: number) {
-    const currentYear = year || new Date().getFullYear();
+    const currentYear = year || new Date().getFullYear()
 
     const sales = await prisma.sale.findMany({
       where: {
-        status: { not: "CANCELLED" },
+        status: { not: 'CANCELLED' },
         createdAt: {
           gte: new Date(`${currentYear}-01-01`),
           lte: new Date(`${currentYear}-12-31`),
@@ -338,47 +335,47 @@ export const salesService = {
         total: true,
         createdAt: true,
       },
-    });
+    })
 
     // Agrupar por mês
     const monthlyData = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       revenue: 0,
-    }));
+    }))
 
     sales.forEach((sale) => {
-      const month = sale.createdAt.getMonth(); // 0-11
-      monthlyData[month].revenue += Number(sale.total);
-    });
+      const month = sale.createdAt.getMonth() // 0-11
+      monthlyData[month].revenue += Number(sale.total)
+    })
 
     // Nomes dos meses
     const monthNames = [
-      "Jan",
-      "Fev",
-      "Mar",
-      "Abr",
-      "Mai",
-      "Jun",
-      "Jul",
-      "Ago",
-      "Set",
-      "Out",
-      "Nov",
-      "Dez",
-    ];
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
+    ]
 
     return monthlyData.map((data, index) => ({
       month: monthNames[index],
       revenue: Math.round(data.revenue * 100) / 100, // Arredondar 2 casas
-    }));
+    }))
   },
 
   async getTodaySales() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
 
     const [totalResult, countResult] = await Promise.all([
       prisma.sale.aggregate({
@@ -386,7 +383,7 @@ export const salesService = {
           total: true,
         },
         where: {
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
           createdAt: {
             gte: today,
             lt: tomorrow,
@@ -395,19 +392,19 @@ export const salesService = {
       }),
       prisma.sale.count({
         where: {
-          status: { not: "CANCELLED" },
+          status: { not: 'CANCELLED' },
           createdAt: {
             gte: today,
             lt: tomorrow,
           },
         },
       }),
-    ]);
+    ])
 
     return {
       totalRevenue: Number(totalResult._sum.total) || 0,
       totalSales: countResult,
-    };
+    }
   },
 
   async getPendingSales() {
@@ -417,19 +414,19 @@ export const salesService = {
           total: true,
         },
         where: {
-          status: "PENDING",
+          status: 'PENDING',
         },
       }),
       prisma.sale.count({
         where: {
-          status: "PENDING",
+          status: 'PENDING',
         },
       }),
-    ]);
+    ])
 
     return {
       totalPending: Number(totalResult._sum.total) || 0,
       count: countResult,
-    };
+    }
   },
-};
+}
