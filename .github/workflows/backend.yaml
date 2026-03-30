@@ -1,0 +1,31 @@
+name: Backend CI
+
+on:[pull_request, push]
+
+jobs:
+  prettier:
+    name: Prettier check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/krypto'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+  eslint:
+    name: ESLint check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/krypto'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
