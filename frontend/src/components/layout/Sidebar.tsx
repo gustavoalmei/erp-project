@@ -2,7 +2,7 @@ import { CreditCard, LayoutDashboard, LogOut, Moon, Package, PanelRightClose, Pa
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../theme-provider";
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@/hooks/useAuth'
 import { Card } from "../ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import {

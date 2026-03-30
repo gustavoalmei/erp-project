@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { userService } from "@/services/api";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,8 +66,9 @@ export function ProfilePage() {
       const updated = await userService.updateProfile(objSend.name, objSend.email, objSend.avatar);
       updateUser(updated as User);
       toast.success("Perfil atualizado com sucesso.");
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error ?? "Erro ao atualizar perfil.");
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError?.response?.data?.error ?? "Erro ao atualizar perfil.");
     } finally {
       setProfileLoading(false);
     }
@@ -91,8 +92,9 @@ export function ProfilePage() {
       await userService.changePassword(passwordForm.currentPassword, passwordForm.newPassword);
       toast.success("Senha alterada com sucesso.");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error ?? "Erro ao alterar senha.");
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError?.response?.data?.error ?? "Erro ao alterar senha.");
     } finally {
       setPasswordLoading(false);
     }

@@ -171,7 +171,8 @@ export function Products() {
       setDeleting(null);
       load();
     } catch (error) {
-      toast.error("Erro ao excluir produto.");
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError.response?.data?.error || "Erro ao excluir produto.");
     } finally {
       setDeleteLoading(false);
     }

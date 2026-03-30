@@ -24,6 +24,22 @@ interface TopProduct extends Product {
   totalSold: string;
 }
 
+interface revenueDataItem {
+  month: string;
+  revenue: number;
+  expenses: number;
+}
+
+interface lowStockData {
+  count: number;
+  products: {
+    id: number;
+    name: string;
+    stock: number;
+    sku: string;
+  }[];
+}
+
 interface TopCustomers extends Customer {
   totalSpent: number;
   totalPurchases: number
@@ -39,10 +55,10 @@ export function Dashboard() {
     totalSales: 0,
     averageTicket: 0,
   });
-  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [revenueData, setRevenueData] = useState<revenueDataItem[]>([]);
   const [todaySales, setTodaySales] = useState({ totalRevenue: 0, totalSales: 0 });
   const [pendingSales, setPendingSales] = useState({ totalPending: 0, count: 0 });
-  const [lowStock, setLowStock] = useState({ count: 0, products: [] });
+  const [lowStock, setLowStock] = useState<lowStockData>({ count: 0, products: [] });
   const [growth, setGrowth] = useState(0);
 
   const loadData = async () => {
@@ -55,7 +71,7 @@ export function Dashboard() {
     setPendingSales(pending);
 
     // Estoque baixo
-    const stock: any = await productService.getLowStock(10);
+    const stock: lowStockData = await productService.getLowStock(10);
     setLowStock(stock);
 
     // Crescimento (calcular com monthly revenue)
@@ -200,13 +216,16 @@ export function Dashboard() {
   } satisfies ChartConfig
 
   useEffect(() => {
-    fetchTopProducts();
-    fetchTopCustomers();
-    fetchProduts();
-    fetchSalesTotal()
-    fetchSalesStats()
-    loadData();
-    loadRevenueData();
+    const fetchAll = async () => {
+      await fetchTopProducts();
+      await fetchTopCustomers();
+      await fetchProduts();
+      await fetchSalesTotal();
+      await fetchSalesStats();
+      await loadData();
+      await loadRevenueData();
+    };
+    fetchAll();
   }, []);
 
   return (

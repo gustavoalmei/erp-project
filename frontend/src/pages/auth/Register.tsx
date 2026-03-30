@@ -18,7 +18,7 @@ import { Label } from "../../components/ui/label"
 import { Separator } from "../../components/ui/separator"
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -30,8 +30,9 @@ export function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await register({ email, password, name }).then((response: any) => {
-      showToast({ type: "success", message: response.message });
+    await register({ email, password, name }).then((response: unknown) => {
+      const responseReq = response as { message: string };
+      showToast({ type: "success", message: responseReq.message });
       navigate('/login');
     }).catch((error) => {
       showToast({ type: "error", message: error.response.data.error });

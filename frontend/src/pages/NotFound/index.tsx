@@ -7,7 +7,7 @@ export function NotFound() {
   const navigate = useNavigate();
   useEffect(() => {
     navigate("/not-found", { replace: true });
-  }, []);
+  }, [navigate]);
   return (
     <Card className="h-svh p-4 
     rounded-none

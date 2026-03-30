@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { userService } from "@/services/api";
 import type { User, UserForm } from "@/types";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Edit, Search, Trash, Users as UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -55,8 +55,9 @@ export function Users() {
       setIsDialogOpen(false);
       loadUsers();
       toast.success("Usuário atualizado com sucesso");
-    } catch (error: any) {
-      toast.error(error.response.data.error);
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError.response?.data?.error || "Erro ao atualizar usuário");
     } finally {
       setSaving(false);
     }
@@ -71,8 +72,9 @@ export function Users() {
       setIsDeleteDialogOpen(false);
       loadUsers();
       toast.success("Usuário deletado com sucesso");
-    } catch (error: any) {
-      toast.error(error.response.data.error);
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError.response?.data?.error || "Erro ao deletar usuário");
     } finally {
       setSaving(false);
     }
@@ -88,7 +90,8 @@ export function Users() {
       const response = await userService.getAll();
       setAllUsers(response.sort((a, b) => a.name.localeCompare(b.name)));
     } catch (error) {
-      console.error("Erro ao carregar usuários:", error);
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError.response?.data?.error || "Erro ao carregar usuários");
     } finally {
       setLoading(false);
     }

@@ -111,8 +111,9 @@ export function Categories() {
       setDeleteOpen(false);
       setDeleting(null);
       load();
-    } catch (error: any) {
-      toast.error(error.response.data.error);
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      toast.error(axiosError.response?.data?.error);
     } finally {
       setDeleteLoading(false);
     }
