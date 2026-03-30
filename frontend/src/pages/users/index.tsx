@@ -1,104 +1,114 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { userService } from "@/services/api";
-import type { User, UserForm } from "@/types";
-import { useAuth } from "@/hooks/useAuth";
-import { Edit, Search, Trash, Users as UsersIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { userService } from '@/services/api'
+import type { User, UserForm } from '@/types'
+import { useAuth } from '@/hooks/useAuth'
+import { Edit, Search, Trash, Users as UsersIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "react-toastify";
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { toast } from 'react-toastify'
 
 export function Users() {
-  const { user: loggedUser, updateUser } = useAuth();
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserForm | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { user: loggedUser, updateUser } = useAuth()
+  const [allUsers, setAllUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<UserForm | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-  const users = allUsers.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const users = allUsers.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()))
 
   const handleEditUser = (id: number) => {
-    setIsDialogOpen(true);
-    setSelectedUser(allUsers.find((u) => u.id === id) || null);
+    setIsDialogOpen(true)
+    setSelectedUser(allUsers.find((u) => u.id === id) || null)
   }
 
   const handleDeleteUser = (id: number) => {
-    setIsDeleteDialogOpen(true);
-    setSelectedUser(allUsers.find((u) => u.id === id) || null);
+    setIsDeleteDialogOpen(true)
+    setSelectedUser(allUsers.find((u) => u.id === id) || null)
   }
 
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true)
     try {
       if (selectedUser) {
-        const updated = await userService.update(selectedUser.id, selectedUser);
+        const updated = await userService.update(selectedUser.id, selectedUser)
         if (loggedUser && updated.id === loggedUser.id) {
-          updateUser(updated);
+          updateUser(updated)
         }
       }
-      setIsDialogOpen(false);
-      loadUsers();
-      toast.success("Usuário atualizado com sucesso");
+      setIsDialogOpen(false)
+      loadUsers()
+      toast.success('Usuário atualizado com sucesso')
     } catch (error) {
-      const axiosError = error as { response?: { data?: { error?: string } } };
-      toast.error(axiosError.response?.data?.error || "Erro ao atualizar usuário");
+      const axiosError = error as { response?: { data?: { error?: string } } }
+      toast.error(axiosError.response?.data?.error || 'Erro ao atualizar usuário')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
   }
 
   const handleDelete = async () => {
-    setSaving(true);
+    setSaving(true)
     try {
       if (selectedUser) {
-        await userService.delete(selectedUser.id);
+        await userService.delete(selectedUser.id)
       }
-      setIsDeleteDialogOpen(false);
-      loadUsers();
-      toast.success("Usuário deletado com sucesso");
+      setIsDeleteDialogOpen(false)
+      loadUsers()
+      toast.success('Usuário deletado com sucesso')
     } catch (error) {
-      const axiosError = error as { response?: { data?: { error?: string } } };
-      toast.error(axiosError.response?.data?.error || "Erro ao deletar usuário");
+      const axiosError = error as { response?: { data?: { error?: string } } }
+      toast.error(axiosError.response?.data?.error || 'Erro ao deletar usuário')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
   }
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    loadUsers()
+  }, [])
 
   const loadUsers = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const response = await userService.getAll();
-      setAllUsers(response.sort((a, b) => a.name.localeCompare(b.name)));
+      const response = await userService.getAll()
+      setAllUsers(response.sort((a, b) => a.name.localeCompare(b.name)))
     } catch (error) {
-      const axiosError = error as { response?: { data?: { error?: string } } };
-      toast.error(axiosError.response?.data?.error || "Erro ao carregar usuários");
+      const axiosError = error as { response?: { data?: { error?: string } } }
+      toast.error(axiosError.response?.data?.error || 'Erro ao carregar usuários')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   return (
-
     <Card className="p-4 border-color-border-default cursor-default">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -123,7 +133,7 @@ export function Users() {
       <Card className="border-color-border-default shadow-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-color-text-primary text-base">
-            {loading ? "Carregando..." : `${users.length} usuários`}
+            {loading ? 'Carregando...' : `${users.length} usuários`}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -155,23 +165,38 @@ export function Users() {
                   <TableRow key={user.id}>
                     <TableCell className="text-color-text-primary font-medium">
                       {user.avatar ? (
-                        <img src={user.avatar} alt="Avatar do usuário" className="w-10 h-10 rounded-full object-cover" />
+                        <img
+                          src={user.avatar}
+                          alt="Avatar do usuário"
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-color-primary flex items-center justify-center text-color-text-primary text-lg font-bold">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="text-color-text-primary font-medium">{user.name}</TableCell>
+                    <TableCell className="text-color-text-primary font-medium">
+                      {user.name}
+                    </TableCell>
                     <TableCell className="text-color-text-primary">{user.email}</TableCell>
                     <TableCell className="text-color-text-primary">
-                      <Badge variant="outline" className={`${user.role === "ADMIN" ? "text-red-300" : "text-green-300"} bg-color-surface border-color-border-default`}>
-                        {user.role === "ADMIN" ? "Administrador" : "Usuário"}
+                      <Badge
+                        variant="outline"
+                        className={`${user.role === 'ADMIN' ? 'text-red-300' : 'text-green-300'} bg-color-surface border-color-border-default`}
+                      >
+                        {user.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
                       </Badge>
                     </TableCell>
                     <TableCell className="flex items-center gap-2 text-color-text-primary">
-                      <Edit className="w-4 h-4 text-color-text-primary cursor-pointer" onClick={() => handleEditUser(user.id)} />
-                      <Trash className="w-4 h-4 text-color-text-primary cursor-pointer" onClick={() => handleDeleteUser(user.id)} />
+                      <Edit
+                        className="w-4 h-4 text-color-text-primary cursor-pointer"
+                        onClick={() => handleEditUser(user.id)}
+                      />
+                      <Trash
+                        className="w-4 h-4 text-color-text-primary cursor-pointer"
+                        onClick={() => handleDeleteUser(user.id)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))
@@ -185,9 +210,7 @@ export function Users() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-color-bg-secondary border-color-border-default text-color-text-primary">
           <DialogHeader>
-            <DialogTitle className="text-color-text-primary">
-              Editar Usuário
-            </DialogTitle>
+            <DialogTitle className="text-color-text-primary">Editar Usuário</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
@@ -195,8 +218,10 @@ export function Users() {
               <Input
                 placeholder="Nome do usuário"
                 value={selectedUser?.name}
-                onChange={(e) => setSelectedUser({ ...selectedUser as User, name: e.target.value })}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                onChange={(e) =>
+                  setSelectedUser({ ...(selectedUser as User), name: e.target.value })
+                }
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                 className="bg-color-surface border-color-border-default text-color-text-primary"
               />
             </div>
@@ -205,8 +230,10 @@ export function Users() {
               <Input
                 placeholder="Email do usuário"
                 value={selectedUser?.email}
-                onChange={(e) => setSelectedUser({ ...selectedUser as User, email: e.target.value })}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                onChange={(e) =>
+                  setSelectedUser({ ...(selectedUser as User), email: e.target.value })
+                }
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                 className="bg-color-surface border-color-border-default text-color-text-primary"
               />
             </div>
@@ -214,14 +241,23 @@ export function Users() {
               <Label className="text-color-text-primary">Perfil</Label>
               <Select
                 value={selectedUser?.role}
-                onValueChange={(e) => setSelectedUser({ ...selectedUser as User, role: e as "ADMIN" | "USER" })}
+                onValueChange={(e) =>
+                  setSelectedUser({ ...(selectedUser as User), role: e as 'ADMIN' | 'USER' })
+                }
               >
                 <SelectTrigger className="bg-color-surface border-color-border-default text-color-text-primary w-full">
                   <SelectValue placeholder="Perfil do usuário" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="bg-color-bg-secondary text-color-text-primary">
-                  <SelectItem value="ADMIN" className="hover:bg-color-primary-hover cursor-pointer">Administrador</SelectItem>
-                  <SelectItem value="USER" className="hover:bg-color-primary-hover cursor-pointer">Usuário</SelectItem>
+                <SelectContent
+                  position="popper"
+                  className="bg-color-bg-secondary text-color-text-primary"
+                >
+                  <SelectItem value="ADMIN" className="hover:bg-color-primary-hover cursor-pointer">
+                    Administrador
+                  </SelectItem>
+                  <SelectItem value="USER" className="hover:bg-color-primary-hover cursor-pointer">
+                    Usuário
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -239,7 +275,7 @@ export function Users() {
               disabled={saving}
               className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
             >
-              {saving ? "Salvando..." : "Salvar"}
+              {saving ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -249,13 +285,13 @@ export function Users() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="bg-color-bg-secondary border-color-border-default">
           <DialogHeader>
-            <DialogTitle className="text-color-text-primary">
-              Deletar Usuário
-            </DialogTitle>
+            <DialogTitle className="text-color-text-primary">Deletar Usuário</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
-              <p className="text-color-text-primary">Tem certeza que deseja deletar o usuário {selectedUser?.name}?</p>
+              <p className="text-color-text-primary">
+                Tem certeza que deseja deletar o usuário {selectedUser?.name}?
+              </p>
             </div>
           </div>
           <DialogFooter>
@@ -271,11 +307,11 @@ export function Users() {
               disabled={saving}
               className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
             >
-              {saving ? "Deletando..." : "Deletar"}
+              {saving ? 'Deletando...' : 'Deletar'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
-  );
+  )
 }

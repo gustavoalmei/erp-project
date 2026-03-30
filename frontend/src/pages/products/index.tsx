@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { categoryService, productService } from "@/services/api";
-import type { Category, Product, ProductForm } from "../../types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useEffect, useState } from 'react'
+import { categoryService, productService } from '@/services/api'
+import type { Category, Product, ProductForm } from '../../types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Table,
   TableBody,
@@ -13,173 +13,185 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { toast } from "react-toastify";
+} from '@/components/ui/dialog'
+import { Package, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { toast } from 'react-toastify'
 
 const EMPTY_FORM: ProductForm = {
-  name: "",
-  description: "",
+  name: '',
+  description: '',
   price: 0,
   stock: 0,
-  sku: "",
+  sku: '',
   categoryId: 0,
-};
+}
 
-const centsToFloat = (cents: number) => cents / 100;
+const centsToFloat = (cents: number) => cents / 100
 
 const formatCents = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100)
 
 const parseCents = (value: string) => {
-  const digits = value.replace(/\D/g, "");
-  return digits === "" ? 0 : parseInt(digits, 10);
-};
+  const digits = value.replace(/\D/g, '')
+  return digits === '' ? 0 : parseInt(digits, 10)
+}
 
 export function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filtered, setFiltered] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([])
+  const [filtered, setFiltered] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
   // Modal de criação/edição
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<Product | null>(null);
-  const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
-  const [priceCents, setPriceCents] = useState(0);
-  const [saving, setSaving] = useState(false);
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<Product | null>(null)
+  const [form, setForm] = useState<ProductForm>(EMPTY_FORM)
+  const [priceCents, setPriceCents] = useState(0)
+  const [saving, setSaving] = useState(false)
 
   // Modal de confirmação de exclusão
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleting, setDeleting] = useState<Product | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState<Product | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const load = async () => {
     try {
-      setLoading(true);
-      const [prods, cats] = await Promise.all([
-        productService.getAll(),
-        categoryService.getAll(),
-      ]);
-      setProducts(prods.sort((a, b) => a.name.localeCompare(b.name)));
-      setFiltered(prods);
-      setCategories(cats);
+      setLoading(true)
+      const [prods, cats] = await Promise.all([productService.getAll(), categoryService.getAll()])
+      setProducts(prods.sort((a, b) => a.name.localeCompare(b.name)))
+      setFiltered(prods)
+      setCategories(cats)
     } catch {
-      toast.error("Erro ao carregar produtos.");
+      toast.error('Erro ao carregar produtos.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    load();
-  }, []);
+    load()
+  }, [])
 
   useEffect(() => {
-    const q = search.toLowerCase();
+    const q = search.toLowerCase()
     setFiltered(
       products.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.sku.toLowerCase().includes(q) ||
-          p.category?.name.toLowerCase().includes(q)
-      )
-    );
-  }, [search, products]);
+          p.category?.name.toLowerCase().includes(q),
+      ),
+    )
+  }, [search, products])
 
   const openCreate = () => {
-    setEditing(null);
-    setForm(EMPTY_FORM);
-    setPriceCents(0);
-    setFormOpen(true);
-  };
+    setEditing(null)
+    setForm(EMPTY_FORM)
+    setPriceCents(0)
+    setFormOpen(true)
+  }
 
   const openEdit = (product: Product) => {
-    setEditing(product);
-    const cents = Math.round(product.price * 100);
+    setEditing(product)
+    const cents = Math.round(product.price * 100)
     setForm({
       name: product.name,
-      description: product.description ?? "",
+      description: product.description ?? '',
       price: product.price,
       stock: product.stock,
       sku: product.sku,
       categoryId: product.categoryId,
-    });
-    setPriceCents(cents);
-    setFormOpen(true);
-  };
+    })
+    setPriceCents(cents)
+    setFormOpen(true)
+  }
 
   const handleChange = (field: keyof ProductForm, value: string | number) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
 
   const validate = () => {
-    if (!form.name.trim()) { toast.error("Nome é obrigatório."); return false; }
-    if (!form.sku.trim()) { toast.error("SKU é obrigatório."); return false; }
-    if (priceCents <= 0) { toast.error("Preço deve ser maior que zero."); return false; }
-    if (form.stock < 0) { toast.error("Estoque não pode ser negativo."); return false; }
-    if (!form.categoryId) { toast.error("Selecione uma categoria."); return false; }
-    return true;
-  };
+    if (!form.name.trim()) {
+      toast.error('Nome é obrigatório.')
+      return false
+    }
+    if (!form.sku.trim()) {
+      toast.error('SKU é obrigatório.')
+      return false
+    }
+    if (priceCents <= 0) {
+      toast.error('Preço deve ser maior que zero.')
+      return false
+    }
+    if (form.stock < 0) {
+      toast.error('Estoque não pode ser negativo.')
+      return false
+    }
+    if (!form.categoryId) {
+      toast.error('Selecione uma categoria.')
+      return false
+    }
+    return true
+  }
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!validate()) return
     try {
-      setSaving(true);
+      setSaving(true)
       const payload: ProductForm = {
         ...form,
         price: centsToFloat(priceCents),
         stock: Number(form.stock),
         categoryId: Number(form.categoryId),
-      };
-      if (editing) {
-        await productService.update(editing.id, payload);
-        toast.success("Produto atualizado com sucesso.");
-      } else {
-        await productService.create(payload);
-        toast.success("Produto criado com sucesso.");
       }
-      setFormOpen(false);
-      load();
+      if (editing) {
+        await productService.update(editing.id, payload)
+        toast.success('Produto atualizado com sucesso.')
+      } else {
+        await productService.create(payload)
+        toast.success('Produto criado com sucesso.')
+      }
+      setFormOpen(false)
+      load()
     } catch {
-      toast.error("Erro ao salvar produto.");
+      toast.error('Erro ao salvar produto.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const openDelete = (product: Product) => {
-    setDeleting(product);
-    setDeleteOpen(true);
-  };
+    setDeleting(product)
+    setDeleteOpen(true)
+  }
 
   const handleDelete = async () => {
-    if (!deleting) return;
+    if (!deleting) return
     try {
-      setDeleteLoading(true);
-      await productService.delete(deleting.id);
-      toast.success("Produto excluído com sucesso.");
-      setDeleteOpen(false);
-      setDeleting(null);
-      load();
+      setDeleteLoading(true)
+      await productService.delete(deleting.id)
+      toast.success('Produto excluído com sucesso.')
+      setDeleteOpen(false)
+      setDeleting(null)
+      load()
     } catch (error) {
-      const axiosError = error as { response?: { data?: { error?: string } } };
-      toast.error(axiosError.response?.data?.error || "Erro ao excluir produto.");
+      const axiosError = error as { response?: { data?: { error?: string } } }
+      toast.error(axiosError.response?.data?.error || 'Erro ao excluir produto.')
     } finally {
-      setDeleteLoading(false);
+      setDeleteLoading(false)
     }
-  };
+  }
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   return (
     <Card className="p-4 border-color-border-default cursor-default">
@@ -213,7 +225,7 @@ export function Products() {
       <Card className="border-color-border-default shadow-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-color-text-primary text-base">
-            {loading ? "Carregando..." : `${filtered.length} produtos`}
+            {loading ? 'Carregando...' : `${filtered.length} produtos`}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -244,11 +256,15 @@ export function Products() {
               ) : (
                 filtered.map((product) => (
                   <TableRow key={product.id} className="border-color-border-default">
-                    <TableCell className="text-color-text-primary font-mono text-sm">{product.sku}</TableCell>
-                    <TableCell className="text-color-text-primary font-medium">{product.name}</TableCell>
+                    <TableCell className="text-color-text-primary font-mono text-sm">
+                      {product.sku}
+                    </TableCell>
+                    <TableCell className="text-color-text-primary font-medium">
+                      {product.name}
+                    </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-color-surface text-color-text-primary border border-color-border-default">
-                        {product.category?.name ?? "—"}
+                        {product.category?.name ?? '—'}
                       </span>
                     </TableCell>
                     <TableCell className="text-color-text-primary text-right">
@@ -256,12 +272,13 @@ export function Products() {
                     </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className={`font-medium ${product.stock <= 10
-                          ? "text-red-500"
-                          : product.stock <= 30
-                            ? "text-yellow-500"
-                            : "text-green-500"
-                          }`}
+                        className={`font-medium ${
+                          product.stock <= 10
+                            ? 'text-red-500'
+                            : product.stock <= 30
+                              ? 'text-yellow-500'
+                              : 'text-green-500'
+                        }`}
                       >
                         {product.stock}
                       </span>
@@ -299,7 +316,7 @@ export function Products() {
         <DialogContent className="bg-color-bg-secondary border-color-border-default max-w-lg text-color-text-primary">
           <DialogHeader>
             <DialogTitle className="text-color-text-primary">
-              {editing ? "Editar Produto" : "Novo Produto"}
+              {editing ? 'Editar Produto' : 'Novo Produto'}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
@@ -309,7 +326,7 @@ export function Products() {
                 <Input
                   placeholder="Nome do produto"
                   value={form.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
+                  onChange={(e) => handleChange('name', e.target.value)}
                   className="bg-color-surface border-color-border-default text-color-text-primary"
                 />
               </div>
@@ -318,7 +335,7 @@ export function Products() {
                 <Input
                   placeholder="Ex: PROD-001"
                   value={form.sku}
-                  onChange={(e) => handleChange("sku", e.target.value)}
+                  onChange={(e) => handleChange('sku', e.target.value)}
                   className="bg-color-surface border-color-border-default text-color-text-primary"
                 />
               </div>
@@ -326,12 +343,16 @@ export function Products() {
                 <Label className="text-color-text-primary">Categoria *</Label>
                 <select
                   value={form.categoryId}
-                  onChange={(e) => handleChange("categoryId", Number(e.target.value))}
+                  onChange={(e) => handleChange('categoryId', Number(e.target.value))}
                   className="h-10 w-full rounded-md border border-color-border-default bg-color-surface px-3 text-sm text-color-text-primary focus:outline-none focus:ring-2 focus:ring-color-primary"
                 >
-                  <option value={0} disabled>Selecione...</option>
+                  <option value={0} disabled>
+                    Selecione...
+                  </option>
                   {categories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -341,7 +362,7 @@ export function Products() {
                   type="text"
                   inputMode="numeric"
                   placeholder="R$ 0,00"
-                  value={priceCents === 0 ? "" : formatCents(priceCents)}
+                  value={priceCents === 0 ? '' : formatCents(priceCents)}
                   onChange={(e) => setPriceCents(parseCents(e.target.value))}
                   className="bg-color-surface border-color-border-default text-color-text-primary"
                 />
@@ -353,7 +374,7 @@ export function Products() {
                   min={0}
                   placeholder="0"
                   value={form.stock}
-                  onChange={(e) => handleChange("stock", e.target.value)}
+                  onChange={(e) => handleChange('stock', e.target.value)}
                   className="bg-color-surface border-color-border-default text-color-text-primary"
                 />
               </div>
@@ -362,7 +383,7 @@ export function Products() {
                 <Textarea
                   placeholder="Descrição opcional..."
                   value={form.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
+                  onChange={(e) => handleChange('description', e.target.value)}
                   className="bg-color-surface border-color-border-default text-color-text-primary resize-none"
                   rows={3}
                 />
@@ -382,7 +403,7 @@ export function Products() {
               disabled={saving}
               className="bg-color-primary hover:bg-color-primary-hover dark:text-color-text-primary text-color-text-inverse"
             >
-              {saving ? "Salvando..." : "Salvar"}
+              {saving ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -395,8 +416,9 @@ export function Products() {
             <DialogTitle className="text-color-text-primary">Excluir Produto</DialogTitle>
           </DialogHeader>
           <p className="text-color-text-secondary">
-            Tem certeza que deseja excluir o produto{" "}
-            <span className="font-semibold text-color-text-primary">"{deleting?.name}"</span>? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir o produto{' '}
+            <span className="font-semibold text-color-text-primary">"{deleting?.name}"</span>? Esta
+            ação não pode ser desfeita.
           </p>
           <DialogFooter>
             <Button
@@ -411,11 +433,11 @@ export function Products() {
               disabled={deleteLoading}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {deleteLoading ? "Excluindo..." : "Excluir"}
+              {deleteLoading ? 'Excluindo...' : 'Excluir'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
-  );
+  )
 }
