@@ -511,7 +511,7 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lowStock.products.map((product: Product) => (
+                {lowStock.products.map((product) => (
                   <TableRow key={product.id} className="hover:bg-color-bg-secondary">
                     <TableCell>{product.name}</TableCell>
                     <TableCell className="text-center">{product.stock}</TableCell>
