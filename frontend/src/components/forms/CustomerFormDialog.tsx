@@ -73,7 +73,7 @@ export function CustomerFormDialog({ open, onOpenChange, editing, onSaved }: Pro
         toast.error(axiosError.response?.data?.error || 'Erro ao carregar cliente.')
         onOpenChange(false)
       })
-  }, [open, editing])
+  }, [open, editing, onOpenChange])
 
   const formatDocument = (value: string) => {
     const d = value.replace(/\D/g, '').slice(0, 14)
