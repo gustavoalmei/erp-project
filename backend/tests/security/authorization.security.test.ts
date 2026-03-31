@@ -115,9 +115,7 @@ describe('Insufficient Role — USER accessing admin routes (expects 403)', () =
   ]
 
   it.each(adminOnlyRoutes)('%s %s returns 403 for USER role', async (method, route) => {
-    const res = await (request(app) as any)
-      [method.toLowerCase()](route)
-      .set(auth(userToken))
+    const res = await (request(app) as any)[method.toLowerCase()](route).set(auth(userToken))
 
     expect(res.status).toBe(403)
     expect(res.body.error).toBe('Acesso negado')
@@ -230,17 +228,13 @@ describe('IDOR Prevention', () => {
 
 describe('Token Misuse', () => {
   it('USER token cannot be used to access admin-gated data', async () => {
-    const res = await request(app)
-      .get('/api/sales/stats')
-      .set(auth(userToken))
+    const res = await request(app).get('/api/sales/stats').set(auth(userToken))
 
     expect(res.status).toBe(403)
   })
 
   it('rejects malformed Authorization header format', async () => {
-    const res = await request(app)
-      .get('/api/customers')
-      .set('Authorization', userToken) // Missing "Bearer " prefix
+    const res = await request(app).get('/api/customers').set('Authorization', userToken) // Missing "Bearer " prefix
 
     expect(res.status).toBe(401)
   })

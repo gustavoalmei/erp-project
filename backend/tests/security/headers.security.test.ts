@@ -7,7 +7,8 @@ jest.mock('../../src/utils/prisma', () => ({
   prisma: {},
 }))
 
-import request, { Response } from 'supertest'
+import type { Response } from 'supertest';
+import request from 'supertest'
 import { createApp } from '../../src/app'
 
 const app = createApp()
