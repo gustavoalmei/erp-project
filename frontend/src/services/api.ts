@@ -187,13 +187,11 @@ export const customerService = {
   },
 
   getById: async (id: number) => {
-    const response = await api.get<Customer>(`/customers/${id}`)
-    return response.data
+    return await api.get<Customer>(`/customers/${id}`)
   },
 
   create: async (data: CustomerForm) => {
-    const response = await api.post<Customer>('/customers', data)
-    return response.data
+    return await api.post<Customer>('/customers', data)
   },
 
   update: async (id: number, data: CustomerForm) => {
