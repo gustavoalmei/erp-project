@@ -9,6 +9,7 @@ import { PrivateRoute } from './components/PrivateRoute'
 import { PublicRoute } from './components/PublicRoute'
 import { Layout } from './components/layout'
 import { Users } from './pages/users'
+import { Customers } from './pages/customers'
 import { NotFound } from './pages/NotFound'
 
 function App() {
@@ -60,6 +61,14 @@ function App() {
         element={
           <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
             <Layout element={<ProfilePage />} />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/clients"
+        element={
+          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+            <Layout element={<Customers />} />
           </PrivateRoute>
         }
       />

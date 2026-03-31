@@ -2,8 +2,34 @@ import { prisma } from '../../utils/prisma'
 
 export const customersService = {
   async allCustomers() {
-    return await prisma.customer.findMany({
+    const customers = await prisma.customer.findMany({
       orderBy: { name: 'asc' },
+      select: {
+        address: true,
+        document: true,
+        email: true,
+        id: true,
+        name: true,
+        phone: true,
+      },
+    })
+
+    return customers.map((customer) => {
+      let document
+      if (customer.document.length === 11) {
+        document = customer.document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-$4')
+      } else if (customer.document.length === 14) {
+        document = customer.document.replace(
+          /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+          '$1.***.***/$4-$5',
+        )
+      } else {
+        document = customer.document
+      }
+      return {
+        ...customer,
+        document,
+      }
     })
   },
 
