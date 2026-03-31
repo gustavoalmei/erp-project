@@ -173,7 +173,10 @@ export const productsController = {
 
   async topSelling(req: Request, res: Response) {
     try {
-      const limit = Number(req.query.limit) || 5
+      const limit = parseInt(req.query.limit as string, 10)
+      if (isNaN(limit) || limit < 1 || limit > 20) {
+        return res.status(400).json({ error: 'Limit deve ser entre 1 e 20.' })
+      }
 
       if (limit < 1 || limit > 20) {
         return res.status(400).json({

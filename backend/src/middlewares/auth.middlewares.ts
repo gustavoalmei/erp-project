@@ -32,7 +32,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 
   try {
-    const decoded = jwt.verify(token, authConfig.jwt.secret) as {
+    const decoded = jwt.verify(token, authConfig.jwt.secret, { algorithms: ['HS256'] }) as {
       userId: number
       role: string
     }
@@ -41,7 +41,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     req.userRole = decoded.role
 
     return next()
-  } catch (err) {
-    return res.status(401).json({ error: err ?? 'Token inválido ou expirado' })
+  } catch {
+    return res.status(401).json({ error: 'Token inválido ou expirado' })
   }
 }

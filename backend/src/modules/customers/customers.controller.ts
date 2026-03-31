@@ -41,6 +41,11 @@ export const customersController = {
         })
       }
 
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Email inválido' })
+      }
+
       await customersService.createCustomer(name, email, phone, document, address)
 
       return res.status(201).json({
@@ -68,6 +73,11 @@ export const customersController = {
         return res.status(400).json({
           error: 'Campos obrigatórios: name, email, phone, document',
         })
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Email inválido' })
       }
 
       await customersService.updateCustomer(id, name, email, phone, document, address)

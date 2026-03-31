@@ -12,9 +12,15 @@ export const authController = {
         })
       }
 
-      if (password.length < 6) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Email inválido' })
+      }
+
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}$/
+      if (!passwordRegex.test(password)) {
         return res.status(400).json({
-          error: 'Senha deve ter no mínimo 6 caracteres',
+          error: 'Senha deve ter no mínimo 12 caracteres, uma maiúscula, um número e um símbolo.',
         })
       }
 
@@ -51,6 +57,11 @@ export const authController = {
         return res.status(400).json({
           error: 'Senha deve ser uma string',
         })
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Email inválido' })
       }
 
       const result = await authService.login(email, password)
