@@ -45,7 +45,8 @@ export const usersController = {
       const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}$/
       if (!passwordRegex.test(newPassword)) {
         return res.status(400).json({
-          error: 'Nova senha deve ter no mínimo 12 caracteres, uma maiúscula, um número e um símbolo.',
+          error:
+            'Nova senha deve ter no mínimo 12 caracteres, uma maiúscula, um número e um símbolo.',
         })
       }
       await usersService.changePassword(req.userId!, currentPassword, newPassword)

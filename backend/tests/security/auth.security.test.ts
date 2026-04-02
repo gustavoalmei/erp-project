@@ -91,37 +91,31 @@ describe('SQL Injection — /api/auth/login', () => {
 
 describe('SQL Injection — /api/auth/register', () => {
   it('handles SQL injection in name field without crashing', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({
-        name: "Robert'); DROP TABLE users; --",
-        email: 'bobby@tables.com',
-        password: 'weak', // fails password policy before hitting DB
-      })
+    const res = await request(app).post('/api/auth/register').send({
+      name: "Robert'); DROP TABLE users; --",
+      email: 'bobby@tables.com',
+      password: 'weak', // fails password policy before hitting DB
+    })
 
     expect(res.status).not.toBe(500)
   })
 
   it('handles XSS payload in name field without crashing', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({
-        name: "<script>alert('XSS')</script>",
-        email: 'xss@test.com',
-        password: 'weak',
-      })
+    const res = await request(app).post('/api/auth/register').send({
+      name: "<script>alert('XSS')</script>",
+      email: 'xss@test.com',
+      password: 'weak',
+    })
 
     expect(res.status).not.toBe(500)
   })
 
   it('handles HTML injection in name field', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({
-        name: '<img src=x onerror=alert(1)>',
-        email: 'html@test.com',
-        password: 'weak',
-      })
+    const res = await request(app).post('/api/auth/register').send({
+      name: '<img src=x onerror=alert(1)>',
+      email: 'html@test.com',
+      password: 'weak',
+    })
 
     expect(res.status).not.toBe(500)
   })
@@ -313,11 +307,10 @@ describe('JWT Security', () => {
   })
 
   it('rejects token signed with wrong secret (secret confusion attack)', async () => {
-    const wrongToken = jwt.sign(
-      { userId: 1, role: 'ADMIN' },
-      'attacker-controlled-wrong-secret',
-      { algorithm: 'HS256', expiresIn: '1h' },
-    )
+    const wrongToken = jwt.sign({ userId: 1, role: 'ADMIN' }, 'attacker-controlled-wrong-secret', {
+      algorithm: 'HS256',
+      expiresIn: '1h',
+    })
 
     const res = await request(app)
       .get('/api/auth/verify')
@@ -341,16 +334,15 @@ describe('JWT Security', () => {
   })
 
   it('rejects tampered payload — role escalation from USER to ADMIN', async () => {
-    const validToken = jwt.sign(
-      { userId: 1, role: 'USER' },
-      TEST_SECRET,
-      { algorithm: 'HS256', expiresIn: '1h' },
-    )
+    const validToken = jwt.sign({ userId: 1, role: 'USER' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      expiresIn: '1h',
+    })
 
     const parts = validToken.split('.')
-    const escalatedPayload = Buffer.from(
-      JSON.stringify({ userId: 1, role: 'ADMIN' }),
-    ).toString('base64url')
+    const escalatedPayload = Buffer.from(JSON.stringify({ userId: 1, role: 'ADMIN' })).toString(
+      'base64url',
+    )
     const tamperedToken = `${parts[0]}.${escalatedPayload}.${parts[2]}`
 
     const res = await request(app)
@@ -361,16 +353,15 @@ describe('JWT Security', () => {
   })
 
   it('rejects tampered payload — userId escalation to admin user', async () => {
-    const validToken = jwt.sign(
-      { userId: 99, role: 'USER' },
-      TEST_SECRET,
-      { algorithm: 'HS256', expiresIn: '1h' },
-    )
+    const validToken = jwt.sign({ userId: 99, role: 'USER' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      expiresIn: '1h',
+    })
 
     const parts = validToken.split('.')
-    const tamperedPayload = Buffer.from(
-      JSON.stringify({ userId: 1, role: 'USER' }),
-    ).toString('base64url')
+    const tamperedPayload = Buffer.from(JSON.stringify({ userId: 1, role: 'USER' })).toString(
+      'base64url',
+    )
     const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`
 
     const res = await request(app)
@@ -381,11 +372,10 @@ describe('JWT Security', () => {
   })
 
   it('rejects token with stripped signature', async () => {
-    const validToken = jwt.sign(
-      { userId: 1, role: 'USER' },
-      TEST_SECRET,
-      { algorithm: 'HS256', expiresIn: '1h' },
-    )
+    const validToken = jwt.sign({ userId: 1, role: 'USER' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      expiresIn: '1h',
+    })
 
     const parts = validToken.split('.')
     const strippedToken = `${parts[0]}.${parts[1]}.`
@@ -398,11 +388,10 @@ describe('JWT Security', () => {
   })
 
   it('accepts valid signed token', async () => {
-    const validToken = jwt.sign(
-      { userId: 1, role: 'USER' },
-      TEST_SECRET,
-      { algorithm: 'HS256', expiresIn: '1h' },
-    )
+    const validToken = jwt.sign({ userId: 1, role: 'USER' }, TEST_SECRET, {
+      algorithm: 'HS256',
+      expiresIn: '1h',
+    })
 
     const res = await request(app)
       .get('/api/auth/verify')

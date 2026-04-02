@@ -7,7 +7,7 @@ jest.mock('../../src/utils/prisma', () => ({
   prisma: {},
 }))
 
-import type { Response } from 'supertest';
+import type { Response } from 'supertest'
 import request from 'supertest'
 import { createApp } from '../../src/app'
 
@@ -58,17 +58,13 @@ describe('Security Headers', () => {
 
 describe('CORS Security', () => {
   it('allows configured origin (localhost:5173)', async () => {
-    const res = await request(app)
-      .get('/health')
-      .set('Origin', 'http://localhost:5173')
+    const res = await request(app).get('/health').set('Origin', 'http://localhost:5173')
 
     expect(res.headers['access-control-allow-origin']).toBe('http://localhost:5173')
   })
 
   it('does not reflect back unauthorized origin', async () => {
-    const res = await request(app)
-      .get('/health')
-      .set('Origin', 'https://malicious-site.com')
+    const res = await request(app).get('/health').set('Origin', 'https://malicious-site.com')
 
     expect(res.headers['access-control-allow-origin']).not.toBe('https://malicious-site.com')
   })
@@ -79,9 +75,7 @@ describe('CORS Security', () => {
   })
 
   it('does not expose sensitive headers in Access-Control-Expose-Headers', async () => {
-    const res = await request(app)
-      .get('/health')
-      .set('Origin', 'http://localhost:5173')
+    const res = await request(app).get('/health').set('Origin', 'http://localhost:5173')
 
     const exposed = res.headers['access-control-expose-headers'] ?? ''
     expect(exposed.toLowerCase()).not.toContain('authorization')
@@ -106,9 +100,7 @@ describe('Request Security', () => {
   })
 
   it('returns JSON content-type on API error responses', async () => {
-    const res = await request(app)
-      .get('/api/auth/verify')
-      .set('Authorization', 'Bearer invalid')
+    const res = await request(app).get('/api/auth/verify').set('Authorization', 'Bearer invalid')
 
     expect(res.headers['content-type']).toMatch(/application\/json/)
     expect(res.headers['content-type']).not.toContain('text/html')
@@ -120,7 +112,7 @@ describe('Request Security', () => {
       .send({ email: 'test@test.com', password: 'wrong' })
 
     const body = JSON.stringify(res.body)
-    expect(body).not.toMatch(/at\s+\w+\s+\(.*\.ts:\d+/)  // stack trace pattern
+    expect(body).not.toMatch(/at\s+\w+\s+\(.*\.ts:\d+/) // stack trace pattern
     expect(body).not.toContain('node_modules')
     expect(body).not.toContain('__dirname')
   })

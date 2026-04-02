@@ -43,9 +43,7 @@ describe('Brute Force — Login', () => {
     const app = newApp()
 
     for (let i = 0; i <= RATE_LIMIT; i++) {
-      await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'test@test.com', password: 'wrong' })
+      await request(app).post('/api/auth/login').send({ email: 'test@test.com', password: 'wrong' })
     }
 
     const res = await request(app)
@@ -61,9 +59,7 @@ describe('Brute Force — Login', () => {
 
     // Exhaust rate limit from default IP (127.0.0.1 in supertest)
     for (let i = 0; i < RATE_LIMIT; i++) {
-      await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'test@test.com', password: 'wrong' })
+      await request(app).post('/api/auth/login').send({ email: 'test@test.com', password: 'wrong' })
     }
 
     // Attempt bypass by spoofing a different IP via X-Forwarded-For
@@ -81,7 +77,13 @@ describe('Brute Force — Login', () => {
     const app = newApp()
 
     // Attacker tries multiple different emails from same IP
-    const emails = ['victim1@test.com', 'victim2@test.com', 'victim3@test.com', 'victim4@test.com', 'victim5@test.com']
+    const emails = [
+      'victim1@test.com',
+      'victim2@test.com',
+      'victim3@test.com',
+      'victim4@test.com',
+      'victim5@test.com',
+    ]
 
     for (const email of emails) {
       await request(app).post('/api/auth/login').send({ email, password: 'guess' })
@@ -120,9 +122,7 @@ describe('Rate Limit Isolation', () => {
 
     // Use up some of the limit on /login
     for (let i = 0; i < Math.floor(RATE_LIMIT / 2); i++) {
-      await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'test@test.com', password: 'wrong' })
+      await request(app).post('/api/auth/login').send({ email: 'test@test.com', password: 'wrong' })
     }
 
     // Use up the rest on /register
