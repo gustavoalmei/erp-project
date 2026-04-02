@@ -47,7 +47,7 @@ export const salesController = {
         return res.status(404).json({ error: error.message })
       }
       if (error instanceof Error && error.message.includes('Estoque insuficiente')) {
-        return res.status(400).json({ error: error.message })
+        return res.status(400).json({ error: 'Estoque insuficiente para um ou mais produtos.' })
       }
       return res.status(500).json({ error: 'Erro interno do servidor' })
     }
@@ -154,7 +154,11 @@ export const salesController = {
 
   async getMonthlyRevenue(req: Request, res: Response) {
     try {
-      const year = req.query.year ? Number(req.query.year) : undefined
+      const year = req.query.year ? parseInt(req.query.year as string, 10) : undefined
+      const currentYear = new Date().getFullYear()
+      if (year && (isNaN(year) || year < 2000 || year > currentYear + 1)) {
+        return res.status(400).json({ error: 'Ano inválido.' })
+      }
 
       const data = await salesService.getMonthlyRevenue(year)
       return res.status(200).json(data)

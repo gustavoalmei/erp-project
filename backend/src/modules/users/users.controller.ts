@@ -22,6 +22,12 @@ export const usersController = {
       if (!isValidBase64) {
         return res.status(400).json({ error: 'Avatar deve ser uma imagem em base64 válida' })
       }
+      const MAX_AVATAR_SIZE = 2 * 1024 * 1024 // 2MB em bytes
+      const base64Data = avatar.split(',')[1] ?? ''
+      const sizeInBytes = Math.ceil((base64Data.length * 3) / 4)
+      if (sizeInBytes > MAX_AVATAR_SIZE) {
+        return res.status(400).json({ error: 'Avatar deve ter no máximo 2MB.' })
+      }
       const user = await usersService.updateProfile(req.userId!, name, email, avatar)
       return res.json(user)
     } catch (error: unknown) {
@@ -36,8 +42,12 @@ export const usersController = {
       if (!currentPassword || !newPassword) {
         return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias' })
       }
-      if (newPassword.length < 6) {
-        return res.status(400).json({ error: 'Nova senha deve ter no mínimo 6 caracteres' })
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,}$/
+      if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({
+          error:
+            'Nova senha deve ter no mínimo 12 caracteres, uma maiúscula, um número e um símbolo.',
+        })
       }
       await usersService.changePassword(req.userId!, currentPassword, newPassword)
       return res.json({ message: 'Senha alterada com sucesso' })

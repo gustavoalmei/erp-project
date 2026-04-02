@@ -45,6 +45,7 @@ export const authService = {
 
     const token = jwt.sign({ userId: user.id, role: user.role }, authConfig.jwt.secret, {
       expiresIn: authConfig.jwt.expiresIn,
+      algorithm: 'HS256',
     })
 
     return {

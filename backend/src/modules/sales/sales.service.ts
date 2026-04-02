@@ -167,7 +167,13 @@ export const salesService = {
     const sale = await prisma.sale.findUnique({
       where: { id },
       include: {
-        customer: true,
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         user: {
           select: {
             id: true,
@@ -177,7 +183,14 @@ export const salesService = {
         },
         items: {
           include: {
-            product: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                sku: true,
+              },
+            },
           },
         },
       },

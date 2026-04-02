@@ -26,8 +26,8 @@ npm install
 Crie um arquivo `.env` na raiz do backend:
 
 ```env
-DATABASE_URL="postgresql://erp-project-user:erp-project-password@localhost:5432/erp-project-db"
-JWT_SECRET="seu_segredo_aqui"
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/DB_NAME"
+JWT_SECRET="seu_segredo_aqui_minimo_32_caracteres"
 JWT_EXPIRES_IN="7d"
 PORT=3000
 ```
