@@ -81,7 +81,7 @@ describe('Unauthenticated Access (expects 401)', () => {
   ]
 
   it.each(protectedRoutes)('%s %s returns 401 without token', async (method, route) => {
-    const res = await (request(app) as any)[method.toLowerCase()](route)
+    const res = await request(app)[method.toLowerCase()](route)
     expect(res.status).toBe(401)
   })
 })
@@ -115,7 +115,7 @@ describe('Insufficient Role — USER accessing admin routes (expects 403)', () =
   ]
 
   it.each(adminOnlyRoutes)('%s %s returns 403 for USER role', async (method, route) => {
-    const res = await (request(app) as any)[method.toLowerCase()](route).set(auth(userToken))
+    const res = await request(app)[method.toLowerCase()](route).set(auth(userToken))
 
     expect(res.status).toBe(403)
     expect(res.body.error).toBe('Acesso negado')

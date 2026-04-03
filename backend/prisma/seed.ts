@@ -29,7 +29,7 @@ async function main() {
     },
   })
 
-  const manager = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name: 'Gestor',
       email: 'gestor@erp.com',
@@ -38,7 +38,7 @@ async function main() {
     },
   })
 
-  const supervisor = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name: 'Supervisor',
       email: 'supervisor@erp.com',
