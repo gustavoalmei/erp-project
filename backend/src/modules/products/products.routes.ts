@@ -12,8 +12,18 @@ router.get('/top-selling', productsController.topSelling)
 router.get('/:id', productsController.getById)
 
 // Rotas protegidas
-router.post('/', authMiddleware, authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'), productsController.create)
-router.put('/:id', authMiddleware, authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'), productsController.update)
+router.post(
+  '/',
+  authMiddleware,
+  authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'),
+  productsController.create,
+)
+router.put(
+  '/:id',
+  authMiddleware,
+  authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'),
+  productsController.update,
+)
 router.delete('/:id', authMiddleware, authorize('ADMIN'), productsController.delete)
 
 export default router
