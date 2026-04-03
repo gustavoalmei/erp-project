@@ -29,14 +29,43 @@ async function main() {
     },
   })
 
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
-      name: 'Vendedor',
-      email: 'vendedor@erp.com',
+      name: 'Gestor',
+      email: 'gestor@erp.com',
       password: hashedPassword,
-      role: 'USER',
+      role: 'MANAGER',
     },
   })
+
+  await prisma.user.create({
+    data: {
+      name: 'Supervisor',
+      email: 'supervisor@erp.com',
+      password: hashedPassword,
+      role: 'SUPERVISOR',
+    },
+  })
+
+  const operator = await prisma.user.create({
+    data: {
+      name: 'Operador',
+      email: 'operador@erp.com',
+      password: hashedPassword,
+      role: 'OPERATOR',
+    },
+  })
+
+  await prisma.user.create({
+    data: {
+      name: 'Visualizador',
+      email: 'viewer@erp.com',
+      password: hashedPassword,
+      role: 'VIEWER',
+    },
+  })
+
+  const user = operator
 
   console.log('✅ Usuários criados')
 

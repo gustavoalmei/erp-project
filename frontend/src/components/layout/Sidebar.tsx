@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { getRoleLabel, getRoleColor } from '@/utils/document'
 
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -40,28 +41,28 @@ export function Sidebar() {
       label: 'Dashboard',
       path: '/dashboard',
       redirect: '/dashboard',
-      havePermission: ['USER', 'ADMIN'],
+      havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER'],
     },
     {
       icon: <Package className="w-5 h-5" />,
       label: 'Produtos',
       path: '/products',
       redirect: '/products',
-      havePermission: ['USER', 'ADMIN'],
+      havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR'],
     },
     {
       icon: <Tags className="w-5 h-5" />,
       label: 'Categorias',
       path: '/categories',
       redirect: '/categories',
-      havePermission: ['USER', 'ADMIN'],
+      havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR'],
     },
     {
       icon: <Users className="w-5 h-5" />,
       label: 'Clientes',
       path: '/clients',
       redirect: '/clients',
-      havePermission: ['USER', 'ADMIN'],
+      havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER'],
     },
     {
       icon: <User className="w-5 h-5" />,
@@ -232,10 +233,10 @@ export function Sidebar() {
                               {user?.name}
                             </p>
                             <p
-                              className="text-sm text-text"
-                              title={user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+                              className={`text-sm ${getRoleColor(user?.role)}`}
+                              title={getRoleLabel(user?.role)}
                             >
-                              {user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+                              {getRoleLabel(user?.role)}
                             </p>
                           </div>
                         </Card>
@@ -500,10 +501,10 @@ export function Sidebar() {
                             {user?.name}
                           </p>
                           <p
-                            className="text-sm text-text"
-                            title={user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+                            className={`text-sm ${getRoleColor(user?.role)}`}
+                            title={getRoleLabel(user?.role)}
                           >
-                            {user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+                            {getRoleLabel(user?.role)}
                           </p>
                         </div>
                       </Card>

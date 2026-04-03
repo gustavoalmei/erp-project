@@ -1,3 +1,23 @@
+export const ROLE_LABELS: Record<string, string> = {
+  ADMIN: 'Administrador',
+  MANAGER: 'Gestor',
+  SUPERVISOR: 'Supervisor',
+  OPERATOR: 'Operador',
+  VIEWER: 'Visualizador',
+}
+
+export const getRoleLabel = (role?: string) => ROLE_LABELS[role ?? ''] ?? role ?? ''
+
+export const ROLE_COLORS: Record<string, string> = {
+  ADMIN: 'text-red-400',
+  MANAGER: 'text-purple-400',
+  SUPERVISOR: 'text-blue-400',
+  OPERATOR: 'text-green-400',
+  VIEWER: 'text-gray-400',
+}
+
+export const getRoleColor = (role?: string) => ROLE_COLORS[role ?? ''] ?? 'text-gray-400'
+
 export const isValidCPF = (cpf: string) => {
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false
   const calc = (digits: string, factor: number) =>

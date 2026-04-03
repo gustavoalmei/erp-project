@@ -35,7 +35,7 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+          <PrivateRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER']}>
             <Layout element={<Dashboard />} />
           </PrivateRoute>
         }
@@ -43,7 +43,7 @@ function App() {
       <Route
         path="/products"
         element={
-          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+          <PrivateRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR']}>
             <Layout element={<Products />} />
           </PrivateRoute>
         }
@@ -51,7 +51,7 @@ function App() {
       <Route
         path="/categories"
         element={
-          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+          <PrivateRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR']}>
             <Layout element={<Categories />} />
           </PrivateRoute>
         }
@@ -59,7 +59,7 @@ function App() {
       <Route
         path="/profile"
         element={
-          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+          <PrivateRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER']}>
             <Layout element={<ProfilePage />} />
           </PrivateRoute>
         }
@@ -67,7 +67,7 @@ function App() {
       <Route
         path="/clients"
         element={
-          <PrivateRoute allowedRoles={['ADMIN', 'USER']}>
+          <PrivateRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER']}>
             <Layout element={<Customers />} />
           </PrivateRoute>
         }

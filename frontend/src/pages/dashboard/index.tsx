@@ -70,41 +70,40 @@ export function Dashboard() {
   const [growth, setGrowth] = useState(0)
 
   const loadData = async () => {
-    // Vendas de hoje
-    const today = await saleService.getTodaySales()
-    setTodaySales(today)
+    const [today, pending, stock, monthlyData] = await Promise.allSettled([
+      saleService.getTodaySales(),
+      saleService.getPendingSales(),
+      productService.getLowStock(10),
+      saleService.getMonthlyRevenue(),
+    ])
 
-    // Vendas pendentes
-    const pending = await saleService.getPendingSales()
-    setPendingSales(pending)
+    if (today.status === 'fulfilled') setTodaySales(today.value)
+    if (pending.status === 'fulfilled') setPendingSales(pending.value)
+    if (stock.status === 'fulfilled') setLowStock(stock.value as lowStockData)
 
-    // Estoque baixo
-    const stock: lowStockData = await productService.getLowStock(10)
-    setLowStock(stock)
-
-    // Crescimento (calcular com monthly revenue)
-    const monthlyData = await saleService.getMonthlyRevenue()
-    const currentMonth = new Date().getMonth() // 0-11
-    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
-
-    const currentRevenue = monthlyData[currentMonth]?.revenue || 0
-    const lastRevenue = monthlyData[lastMonth]?.revenue || 0
-
-    const growthPercent = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue) * 100 : 0
-
-    setGrowth(Math.round(growthPercent * 10) / 10) // 1 casa decimal
+    if (monthlyData.status === 'fulfilled') {
+      const data = monthlyData.value
+      const currentMonth = new Date().getMonth()
+      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
+      const currentRevenue = data[currentMonth]?.revenue || 0
+      const lastRevenue = data[lastMonth]?.revenue || 0
+      const growthPercent =
+        lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue) * 100 : 0
+      setGrowth(Math.round(growthPercent * 10) / 10)
+    }
   }
 
   const loadRevenueData = async () => {
-    const data = await saleService.getMonthlyRevenue(2025)
-
-    // Se você não tem expenses, pode adicionar 0 ou remover do gráfico
-    const formattedData = data.map((item) => ({
-      ...item,
-      expenses: 0, // ← Adicione lógica de expenses se tiver
-    }))
-
-    setRevenueData(formattedData)
+    try {
+      const data = await saleService.getMonthlyRevenue(2025)
+      const formattedData = data.map((item) => ({
+        ...item,
+        expenses: 0,
+      }))
+      setRevenueData(formattedData)
+    } catch {
+      // sem permissão ou erro — mantém vazio
+    }
   }
 
   const returnFormatPrice = (price: number): string => {
@@ -115,31 +114,49 @@ export function Dashboard() {
   }
 
   const fetchProduts = async () => {
-    const response = await productService.getAll()
-    const initialValue = 0
-    const values = response.reduce((val1, val2) => val1 + val2.stock, initialValue)
-    setTotalProducts(values)
+    try {
+      const response = await productService.getAll()
+      const values = response.reduce((val1, val2) => val1 + val2.stock, 0)
+      setTotalProducts(values)
+    } catch {
+      // sem permissão ou erro — mantém 0
+    }
   }
 
   const fetchTopProducts = async (limit: number = 10) => {
-    const data = await dashboardService.getTopProducts(limit)
-    setTopProducts(data)
+    try {
+      const data = await dashboardService.getTopProducts(limit)
+      setTopProducts(data)
+    } catch {
+      // sem permissão ou erro — mantém vazio
+    }
   }
 
   const fetchTopCustomers = async (limit: number = 10) => {
-    const data = await dashboardService.getTopCustomers(limit)
-    setTopCustomers(data)
+    try {
+      const data = await dashboardService.getTopCustomers(limit)
+      setTopCustomers(data)
+    } catch {
+      // sem permissão ou erro — mantém vazio
+    }
   }
 
   const fetchSalesTotal = async () => {
-    const data = await dashboardService.getSalesTotal()
-    setSalesTotal(data.totalRevenue)
+    try {
+      const data = await dashboardService.getSalesTotal()
+      setSalesTotal(data.totalRevenue)
+    } catch {
+      // sem permissão ou erro — mantém 0
+    }
   }
 
   const fetchSalesStats = async () => {
-    const response = await saleService.getStats()
-    const data = response.data
-    setSalesStats(data)
+    try {
+      const response = await saleService.getStats()
+      setSalesStats(response.data)
+    } catch {
+      // sem permissão ou erro — mantém valores padrão
+    }
   }
 
   const cards = [

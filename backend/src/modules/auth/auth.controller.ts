@@ -1,5 +1,6 @@
 import { type Request, type Response } from 'express'
 import { authService } from './auth.service'
+import { logsService } from '../logs/logs.service'
 
 export const authController = {
   async register(req: Request, res: Response) {
@@ -25,6 +26,8 @@ export const authController = {
       }
 
       const user = await authService.register(name, email, password)
+
+      await logsService.create(`Novo usuário registrado: ${email}`, user.id)
 
       return res.status(201).json({
         message: 'Usuário criado com sucesso',
@@ -66,6 +69,8 @@ export const authController = {
 
       const result = await authService.login(email, password)
 
+      await logsService.create(`Login realizado: ${email}`, result.user.id)
+
       return res.status(200).json(result)
     } catch (error) {
       const err = error as Error
@@ -78,6 +83,8 @@ export const authController = {
 
   async logout(req: Request, res: Response) {
     try {
+      await logsService.create('Logout realizado', req.userId)
+
       return res.status(200).json({
         message: 'Logout realizado com sucesso',
       })

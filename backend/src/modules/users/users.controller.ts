@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { usersService } from './users.service'
+import { logsService } from '../logs/logs.service'
 
 export const usersController = {
   async getProfile(req: Request, res: Response) {
@@ -29,6 +30,9 @@ export const usersController = {
         return res.status(400).json({ error: 'Avatar deve ter no máximo 2MB.' })
       }
       const user = await usersService.updateProfile(req.userId!, name, email, avatar)
+
+      await logsService.create(`Perfil atualizado: ${email}`, req.userId)
+
       return res.json(user)
     } catch (error: unknown) {
       const err = error as { code?: number; message?: string }
@@ -50,6 +54,9 @@ export const usersController = {
         })
       }
       await usersService.changePassword(req.userId!, currentPassword, newPassword)
+
+      await logsService.create('Senha alterada', req.userId)
+
       return res.json({ message: 'Senha alterada com sucesso' })
     } catch (error: unknown) {
       const err = error as { code?: number; message?: string }
@@ -75,11 +82,14 @@ export const usersController = {
       if (!name || !email || !role) {
         return res.status(400).json({ error: 'Nome, email e perfil são obrigatórios' })
       }
-      if (!['ADMIN', 'USER'].includes(role)) {
+      if (!['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER'].includes(role)) {
         return res.status(400).json({ error: 'Perfil inválido' })
       }
 
       const user = await usersService.updateUser(id, name, email, role)
+
+      await logsService.create(`Usuário #${id} atualizado (perfil: ${role})`, req.userId)
+
       return res.json(user)
     } catch (error: unknown) {
       const err = error as { code?: number; message?: string }
@@ -93,6 +103,9 @@ export const usersController = {
       if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
 
       await usersService.deleteUser(id)
+
+      await logsService.create(`Usuário #${id} removido`, req.userId)
+
       return res.status(204).send()
     } catch (error: unknown) {
       const err = error as { code?: number; message?: string }
