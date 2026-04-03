@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { customersService } from './customers.service'
+import { logsService } from '../logs/logs.service'
 
 export const customersController = {
   async list(req: Request, res: Response) {
@@ -48,6 +49,8 @@ export const customersController = {
 
       await customersService.createCustomer(name, email, phone, document, address)
 
+      await logsService.create(`Cliente criado: ${name} (${email})`, req.userId)
+
       return res.status(201).json({
         message: 'Cliente criado com sucesso',
       })
@@ -82,6 +85,8 @@ export const customersController = {
 
       await customersService.updateCustomer(id, name, email, phone, document, address)
 
+      await logsService.create(`Cliente #${id} atualizado: ${name}`, req.userId)
+
       return res.status(200).json({
         message: 'Cliente atualizado com sucesso',
       })
@@ -106,6 +111,9 @@ export const customersController = {
       }
 
       const result = await customersService.deleteCustomer(id)
+
+      await logsService.create(`Cliente #${id} removido`, req.userId)
+
       return res.status(200).json(result)
     } catch (error) {
       const err = error as Error

@@ -1,15 +1,9 @@
-import { Router, type Request, type Response, type NextFunction } from 'express'
+import { Router } from 'express'
 import { productsController } from './products.controller'
 import { authMiddleware } from '../../middlewares/auth.middlewares'
+import { authorize } from '../../middlewares/authorize'
 
 const router = Router()
-
-const adminOnly = (req: Request, res: Response, next: NextFunction) => {
-  if (req.userRole !== 'ADMIN') {
-    return res.status(403).json({ error: 'Acesso negado' })
-  }
-  next()
-}
 
 // Rotas públicas
 router.get('/', productsController.list)
@@ -18,8 +12,8 @@ router.get('/top-selling', productsController.topSelling)
 router.get('/:id', productsController.getById)
 
 // Rotas protegidas
-router.post('/', authMiddleware, adminOnly, productsController.create)
-router.put('/:id', authMiddleware, adminOnly, productsController.update)
-router.delete('/:id', authMiddleware, adminOnly, productsController.delete)
+router.post('/', authMiddleware, authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'), productsController.create)
+router.put('/:id', authMiddleware, authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'), productsController.update)
+router.delete('/:id', authMiddleware, authorize('ADMIN'), productsController.delete)
 
 export default router

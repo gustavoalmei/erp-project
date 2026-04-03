@@ -1,5 +1,6 @@
 import { type Request, type Response } from 'express'
 import { categoriesService } from './categories.service'
+import { logsService } from '../logs/logs.service'
 
 export const categoriesController = {
   async list(req: Request, res: Response) {
@@ -41,6 +42,8 @@ export const categoriesController = {
 
       const category = await categoriesService.createCategory(name)
 
+      await logsService.create(`Categoria criada: ${name}`, req.userId)
+
       return res.status(201).json({
         message: 'Categoria criada com sucesso',
         category,
@@ -69,6 +72,8 @@ export const categoriesController = {
 
       const category = await categoriesService.updateCategory(id, name)
 
+      await logsService.create(`Categoria #${id} atualizada: ${name}`, req.userId)
+
       return res.status(200).json({
         message: 'Categoria atualizada com sucesso',
         category,
@@ -94,6 +99,9 @@ export const categoriesController = {
       }
 
       const result = await categoriesService.deleteCategory(id)
+
+      await logsService.create(`Categoria #${id} removida`, req.userId)
+
       return res.status(200).json(result)
     } catch (error) {
       const err = error as Error

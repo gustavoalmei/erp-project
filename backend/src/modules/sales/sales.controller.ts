@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { salesService } from './sales.service'
+import { logsService } from '../logs/logs.service'
 
 export const salesController = {
   async create(req: Request, res: Response) {
@@ -7,14 +8,12 @@ export const salesController = {
       const { customerId, items } = req.body
       const userId = req.userId!
 
-      // Validações
       if (!customerId || !items || items.length === 0) {
         return res.status(400).json({
           error: 'customerId e items são obrigatórios',
         })
       }
 
-      // Validar cada item
       for (const item of items) {
         if (!item.productId || !item.quantity || item.quantity <= 0) {
           return res.status(400).json({
@@ -23,7 +22,6 @@ export const salesController = {
         }
       }
 
-      // Converter tipos
       const customerIdNumber = Number(customerId)
       const itemsConverted = items.map((item: { productId: number; quantity: number }) => ({
         productId: Number(item.productId),
@@ -31,6 +29,11 @@ export const salesController = {
       }))
 
       await salesService.createSale(customerIdNumber, itemsConverted, userId)
+
+      await logsService.create(
+        `Venda criada para cliente #${customerId} (${items.length} item(s))`,
+        userId,
+      )
 
       return res.status(201).json({
         message: 'Venda criada com sucesso',
@@ -95,6 +98,8 @@ export const salesController = {
 
       await salesService.updateSaleStatus(id, status)
 
+      await logsService.create(`Venda #${id} status atualizado: ${status}`, req.userId)
+
       return res.status(200).json({
         message: 'Status atualizado com sucesso',
       })
@@ -119,6 +124,8 @@ export const salesController = {
       }
 
       await salesService.cancelSale(id, userId)
+
+      await logsService.create(`Venda #${id} cancelada`, userId)
 
       return res.status(200).json({
         message: 'Venda cancelada com sucesso',

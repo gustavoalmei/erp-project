@@ -9,8 +9,11 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
-  USER
+  ADMIN       // Administrador do sistema
+  MANAGER     // Gestor / Diretor
+  SUPERVISOR  // Líder de área / supervisor
+  OPERATOR    // Usuário operacional / colaborador
+  VIEWER      // Usuário limitado / leitura
 }
 
 enum SaleStatus {
@@ -29,12 +32,13 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role     @default(USER)
+  role      Role     @default(OPERATOR)
   createdAt DateTime @default(now()) @map("created_at")
   avatar    String?
 
   sales          Sale[]
   stockMovements StockMovement[]
+  activityLogs   ActivityLog[]
 
   @@map("users")
 }
@@ -119,4 +123,15 @@ model StockMovement {
   user    User    @relation(fields: [userId], references: [id])
 
   @@map("stock_movements")
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("activity_logs")
 }

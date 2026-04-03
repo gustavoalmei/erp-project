@@ -6,6 +6,7 @@ import productsRoutes from './modules/products/products.routes'
 import customersRoutes from './modules/customers/customers.routes'
 import salesRoutes from './modules/sales/sales.routes'
 import usersRoutes from './modules/users/users.routes'
+import logsRoutes from './modules/logs/logs.routes'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 
@@ -57,6 +58,7 @@ export function createApp(options: AppOptions = {}) {
   app.use('/api/customers', customersRoutes)
   app.use('/api/sales', salesRoutes)
   app.use('/api/users', usersRoutes)
+  app.use('/api/logs', logsRoutes)
 
   return app
 }

@@ -3,7 +3,7 @@ export interface User {
   id: number
   name: string
   email: string
-  role: 'ADMIN' | 'USER'
+  role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'OPERATOR' | 'VIEWER'
   avatar?: string
 }
 
@@ -11,7 +11,7 @@ export interface UserForm {
   id: number
   name: string
   email: string
-  role: 'ADMIN' | 'USER'
+  role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'OPERATOR' | 'VIEWER'
 }
 
 export interface LoginResponse {
@@ -111,4 +111,17 @@ export interface CreateSaleItem {
 export interface SaleForm {
   customerId: number
   items: CreateSaleItem[]
+}
+
+// Activity Log
+export interface ActivityLog {
+  id: number
+  userId: number | null
+  message: string
+  createdAt: string
+  user: {
+    id: number
+    name: string
+    email: string
+  } | null
 }

@@ -53,7 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return response.data
   }
 
-  const logout = () => {
+  const logout = async () => {
+    await authService.logout()
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setUser(null)

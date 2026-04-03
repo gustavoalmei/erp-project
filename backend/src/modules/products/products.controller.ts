@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { productsService } from './products.service'
+import { logsService } from '../logs/logs.service'
 
 export const productsController = {
   async list(req: Request, res: Response) {
@@ -70,6 +71,8 @@ export const productsController = {
         categoryIdNumber,
       )
 
+      await logsService.create(`Produto criado: ${name} (SKU: ${sku})`, req.userId)
+
       return res.status(201).json({
         message: 'Produto criado com sucesso',
         product,
@@ -132,6 +135,8 @@ export const productsController = {
         categoryIdNumber,
       )
 
+      await logsService.create(`Produto #${id} atualizado: ${name}`, req.userId)
+
       return res.status(200).json({
         message: 'Produto atualizado com sucesso',
         product,
@@ -159,6 +164,9 @@ export const productsController = {
       }
 
       const result = await productsService.deleteProduct(id)
+
+      await logsService.create(`Produto #${id} removido`, req.userId)
+
       return res.status(200).json(result)
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'Produto não encontrado') {

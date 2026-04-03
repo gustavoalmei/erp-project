@@ -63,6 +63,10 @@ export const authService = {
   verify: async () => {
     return await api.get<{ valid: boolean }>('/auth/verify')
   },
+
+  logout: async () => {
+    return await api.post('/auth/logout')
+  },
 }
 
 // ========== USERS ==========
@@ -108,6 +112,11 @@ export const userService = {
       currentPassword,
       newPassword,
     })
+    return response.data
+  },
+
+  getLogsByUser: async (id: number) => {
+    const response = await api.get(`/logs/user/${id}`)
     return response.data
   },
 }

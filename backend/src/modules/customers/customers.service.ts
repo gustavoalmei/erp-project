@@ -41,18 +41,7 @@ export const customersService = {
     if (!customer) {
       throw new Error('Cliente não encontrado')
     }
-
-    let document = customer.document
-    if (customer.document.length === 11) {
-      document = customer.document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-$4')
-    } else if (customer.document.length === 14) {
-      document = customer.document.replace(
-        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-        '$1.***.***/$4-$5',
-      )
-    }
-
-    return { ...customer, document }
+    return customer
   },
 
   async createCustomer(

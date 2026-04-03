@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Camera, Eye, EyeOff, KeyRound, Settings, UserRound } from 'lucide-react'
+import { getRoleLabel } from '@/utils/document'
 import { toast } from 'react-toastify'
 import type { User } from '../../types'
 
@@ -184,7 +185,7 @@ export function ProfilePage() {
               <Label className="text-color-text-secondary text-sm">Papel</Label>
               <div className="h-10 flex items-center">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-color-surface border border-color-border-default text-color-text-secondary">
-                  {user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+                  {getRoleLabel(user?.role)}
                 </span>
               </div>
             </div>

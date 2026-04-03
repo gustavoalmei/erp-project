@@ -11,9 +11,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { userService } from '@/services/api'
-import type { User, UserForm } from '@/types'
+import { getRoleLabel, getRoleColor } from '@/utils/document'
+import type { User, UserForm, ActivityLog } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
-import { Edit, Search, Trash, Users as UsersIcon } from 'lucide-react'
+import { Edit, Eye, Search, Trash, Users as UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   Dialog,
@@ -41,17 +42,47 @@ export function Users() {
   const [selectedUser, setSelectedUser] = useState<UserForm | null>(null)
   const [saving, setSaving] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [logs, setLogs] = useState<ActivityLog[]>([])
+  const [loadingLogs, setLoadingLogs] = useState(false)
 
   const users = allUsers.filter((u) => u.name.toLowerCase().includes(search.toLowerCase()))
 
   const handleEditUser = (id: number) => {
+    if (loggedUser?.role !== 'ADMIN') {
+      toast.error('Você não tem permissão para editar usuários')
+      return
+    }
     setIsDialogOpen(true)
     setSelectedUser(allUsers.find((u) => u.id === id) || null)
   }
 
   const handleDeleteUser = (id: number) => {
+    if (loggedUser?.role !== 'ADMIN') {
+      toast.error('Você não tem permissão para deletar usuários')
+      return
+    }
     setIsDeleteDialogOpen(true)
     setSelectedUser(allUsers.find((u) => u.id === id) || null)
+  }
+
+  const handleViewUser = async (id: number) => {
+    if (loggedUser?.role !== 'ADMIN') {
+      toast.error('Você não tem permissão para ver usuários')
+      return
+    }
+    setSelectedUser(allUsers.find((u) => u.id === id) || null)
+    setIsViewDialogOpen(true)
+    setLoadingLogs(true)
+    try {
+      const data = await userService.getLogsByUser(id)
+      setLogs(data)
+    } catch {
+      toast.error('Erro ao carregar logs do usuário')
+      setLogs([])
+    } finally {
+      setLoadingLogs(false)
+    }
   }
 
   const handleSave = async () => {
@@ -183,20 +214,26 @@ export function Users() {
                     <TableCell className="text-color-text-primary">
                       <Badge
                         variant="outline"
-                        className={`${user.role === 'ADMIN' ? 'text-red-300' : 'text-green-300'} bg-color-surface border-color-border-default`}
+                        className={`${getRoleColor(user.role)} bg-color-surface border-color-border-default`}
                       >
-                        {user.role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+                        {getRoleLabel(user.role)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="flex items-center gap-2 text-color-text-primary">
-                      <Edit
-                        className="w-4 h-4 text-color-text-primary cursor-pointer"
-                        onClick={() => handleEditUser(user.id)}
-                      />
-                      <Trash
-                        className="w-4 h-4 text-color-text-primary cursor-pointer"
-                        onClick={() => handleDeleteUser(user.id)}
-                      />
+                    <TableCell className="text-color-text-primary">
+                      <div className="flex items-center gap-2">
+                        <Edit
+                          className="w-4 h-4 text-color-text-primary cursor-pointer"
+                          onClick={() => handleEditUser(user.id)}
+                        />
+                        <Trash
+                          className="w-4 h-4 text-color-text-primary cursor-pointer"
+                          onClick={() => handleDeleteUser(user.id)}
+                        />
+                        <Eye
+                          className="w-4 h-4 text-color-text-primary cursor-pointer"
+                          onClick={() => handleViewUser(user.id)}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -242,7 +279,7 @@ export function Users() {
               <Select
                 value={selectedUser?.role}
                 onValueChange={(e) =>
-                  setSelectedUser({ ...(selectedUser as User), role: e as 'ADMIN' | 'USER' })
+                  setSelectedUser({ ...(selectedUser as User), role: e as User['role'] })
                 }
               >
                 <SelectTrigger className="bg-color-surface border-color-border-default text-color-text-primary w-full">
@@ -252,12 +289,11 @@ export function Users() {
                   position="popper"
                   className="bg-color-bg-secondary text-color-text-primary"
                 >
-                  <SelectItem value="ADMIN" className="hover:bg-color-primary-hover cursor-pointer">
-                    Administrador
-                  </SelectItem>
-                  <SelectItem value="USER" className="hover:bg-color-primary-hover cursor-pointer">
-                    Usuário
-                  </SelectItem>
+                  <SelectItem value="ADMIN" className="hover:bg-color-primary-hover cursor-pointer">Administrador</SelectItem>
+                  <SelectItem value="MANAGER" className="hover:bg-color-primary-hover cursor-pointer">Gestor</SelectItem>
+                  <SelectItem value="SUPERVISOR" className="hover:bg-color-primary-hover cursor-pointer">Supervisor</SelectItem>
+                  <SelectItem value="OPERATOR" className="hover:bg-color-primary-hover cursor-pointer">Operador</SelectItem>
+                  <SelectItem value="VIEWER" className="hover:bg-color-primary-hover cursor-pointer">Visualizador</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -308,6 +344,63 @@ export function Users() {
               className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
             >
               {saving ? 'Deletando...' : 'Deletar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Logs do usuário selecionado */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="bg-color-bg-secondary border-color-border-default max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-color-text-primary">
+              Logs de {selectedUser?.name}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="max-h-[60vh] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-color-text-secondary w-[180px]">Data</TableHead>
+                  <TableHead className="text-color-text-secondary">Ação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingLogs ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center text-color-text-secondary py-8">
+                      Carregando...
+                    </TableCell>
+                  </TableRow>
+                ) : logs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center text-color-text-secondary py-8">
+                      Nenhum log encontrado.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  logs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="text-color-text-secondary text-sm whitespace-nowrap">
+                        {new Date(log.createdAt).toLocaleString('pt-BR')}
+                      </TableCell>
+                      <TableCell className="text-color-text-primary text-sm">
+                        {log.message}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={() => setIsViewDialogOpen(false)}
+              className="bg-color-primary hover:bg-color-primary-hover text-color-text-primary"
+            >
+              Fechar
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -22,8 +22,10 @@ import {
 import { Pencil, Plus, Search, Trash2, Users } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { CustomerFormDialog } from '@/components/forms/CustomerFormDialog'
+import { useAuth } from '@/hooks/useAuth'
 
 export function Customers() {
+  const { user: loggedUser } = useAuth()
   const [customers, setCustomers] = useState<Customer[]>([])
   const [filtered, setFiltered] = useState<Customer[]>([])
   const [search, setSearch] = useState('')
@@ -67,16 +69,28 @@ export function Customers() {
   }, [search, customers])
 
   const openCreate = () => {
+    if (loggedUser?.role !== 'ADMIN') {
+      toast.error('Você não tem permissão para criar clientes')
+      return
+    }
     setEditing(null)
     setFormOpen(true)
   }
 
   const openEdit = (customer: Customer) => {
+    if (loggedUser?.role !== 'ADMIN') {
+      toast.error('Você não tem permissão para editar clientes')
+      return
+    }
     setEditing(customer)
     setFormOpen(true)
   }
 
   const openDelete = (customer: Customer) => {
+    if (loggedUser?.role !== 'ADMIN') {
+      toast.error('Você não tem permissão para deletar clientes')
+      return
+    }
     setDeleting(customer)
     setDeleteOpen(true)
   }
