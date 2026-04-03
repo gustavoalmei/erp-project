@@ -1,5 +1,5 @@
 import { prisma } from '../../utils/prisma'
-import { Role } from '@prisma/client'
+import { type Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { authConfig } from '../../config/auth'
 
