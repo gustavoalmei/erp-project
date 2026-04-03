@@ -87,7 +87,8 @@ export function Dashboard() {
       const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
       const currentRevenue = data[currentMonth]?.revenue || 0
       const lastRevenue = data[lastMonth]?.revenue || 0
-      const growthPercent = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue) * 100 : 0
+      const growthPercent =
+        lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue) * 100 : 0
       setGrowth(Math.round(growthPercent * 10) / 10)
     }
   }

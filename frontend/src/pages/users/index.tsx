@@ -289,11 +289,33 @@ export function Users() {
                   position="popper"
                   className="bg-color-bg-secondary text-color-text-primary"
                 >
-                  <SelectItem value="ADMIN" className="hover:bg-color-primary-hover cursor-pointer">Administrador</SelectItem>
-                  <SelectItem value="MANAGER" className="hover:bg-color-primary-hover cursor-pointer">Gestor</SelectItem>
-                  <SelectItem value="SUPERVISOR" className="hover:bg-color-primary-hover cursor-pointer">Supervisor</SelectItem>
-                  <SelectItem value="OPERATOR" className="hover:bg-color-primary-hover cursor-pointer">Operador</SelectItem>
-                  <SelectItem value="VIEWER" className="hover:bg-color-primary-hover cursor-pointer">Visualizador</SelectItem>
+                  <SelectItem value="ADMIN" className="hover:bg-color-primary-hover cursor-pointer">
+                    Administrador
+                  </SelectItem>
+                  <SelectItem
+                    value="MANAGER"
+                    className="hover:bg-color-primary-hover cursor-pointer"
+                  >
+                    Gestor
+                  </SelectItem>
+                  <SelectItem
+                    value="SUPERVISOR"
+                    className="hover:bg-color-primary-hover cursor-pointer"
+                  >
+                    Supervisor
+                  </SelectItem>
+                  <SelectItem
+                    value="OPERATOR"
+                    className="hover:bg-color-primary-hover cursor-pointer"
+                  >
+                    Operador
+                  </SelectItem>
+                  <SelectItem
+                    value="VIEWER"
+                    className="hover:bg-color-primary-hover cursor-pointer"
+                  >
+                    Visualizador
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
