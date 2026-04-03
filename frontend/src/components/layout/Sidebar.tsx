@@ -58,6 +58,13 @@ export function Sidebar() {
       havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR'],
     },
     {
+      icon: <CreditCard className="w-5 h-5" />,
+      label: 'Vendas',
+      path: '/sell',
+      redirect: '/sell',
+      havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR'],
+    },
+    {
       icon: <Users className="w-5 h-5" />,
       label: 'Clientes',
       path: '/clients',
