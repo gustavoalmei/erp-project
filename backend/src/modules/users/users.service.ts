@@ -1,4 +1,5 @@
 import { prisma } from '../../utils/prisma'
+import { type Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { authConfig } from '../../config/auth'
 
@@ -63,7 +64,7 @@ export const usersService = {
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, role: role as 'ADMIN' | 'USER' },
+      data: { name, email, role: role as Role },
     })
     return { id: user.id, name: user.name, email: user.email, role: user.role }
   },
