@@ -20,7 +20,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Plus, Search, ShoppingCart, Trash2, Eye, X, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { Plus, Search, ShoppingCart, Trash2, Eye, X, ChevronUp, ChevronDown, ChevronsUpDown, Check } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 const formatCurrency = (value: number) =>
@@ -70,12 +70,18 @@ export function Sell() {
   const [sortKey, setSortKey] = useState<SortKey | null>(null)
   const [sortDir, setSortDir] = useState<SortDir>('none')
 
+
   // Modal nova venda
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState<SaleForm>(EMPTY_FORM)
   const [cart, setCart] = useState<CartItem[]>([])
   const [productSearch, setProductSearch] = useState('')
   const [saving, setSaving] = useState(false)
+
+  // Modal aprovar
+  const [approveOpen, setApproveOpen] = useState(false)
+  const [approving, setApproving] = useState<Sale | null>(null)
+  const [approveLoading, setApproveLoading] = useState(false)
 
   // Modal detalhes
   const [detailOpen, setDetailOpen] = useState(false)
@@ -181,6 +187,11 @@ export function Sell() {
     setCancelOpen(true)
   }
 
+  const openApprove = (sale: Sale) => {
+    setApproving(sale)
+    setApproveOpen(true)
+  }
+
   const addToCart = (product: Product) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id)
@@ -248,7 +259,7 @@ export function Sell() {
     if (!cancelling) return
     try {
       setCancelLoading(true)
-      await saleService.updateStatus(cancelling.id, 'CANCELLED')
+      await saleService.cancel(cancelling.id)
       toast.success('Venda cancelada com sucesso.')
       setCancelOpen(false)
       setCancelling(null)
@@ -260,6 +271,24 @@ export function Sell() {
       setCancelLoading(false)
     }
   }
+
+  const handleApprove = async () => {
+    if (!approving) return
+    try {
+      setApproveLoading(true)
+      await saleService.updateStatus(approving.id, 'COMPLETED')
+      toast.success('Venda aprovada com sucesso.')
+      setApproveOpen(false)
+      setApproving(null)
+      load()
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { error?: string } } }
+      toast.error(axiosError.response?.data?.error || 'Erro ao aprovar venda.')
+    } finally {
+      setApproveLoading(false)
+    }
+  }
+
 
   return (
     <Card className="p-4 border-color-border-default cursor-default">
@@ -371,6 +400,7 @@ export function Sell() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
+                          title='Visualizar Venda'
                           variant="ghost"
                           size="icon"
                           onClick={() => openDetail(sale)}
@@ -379,14 +409,26 @@ export function Sell() {
                           <Eye className="w-4 h-4" />
                         </Button>
                         {sale.status === 'PENDING' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openCancel(sale)}
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
+                          <>
+                            <Button
+                              title='Cancelar Venda'
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openCancel(sale)}
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              title='Aprovar Venda'
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openApprove(sale)}
+                              className="text-green-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </TableCell>
@@ -635,6 +677,36 @@ export function Sell() {
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {cancelLoading ? 'Cancelando...' : 'Cancelar Venda'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Aprovar Venda */}
+      <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
+        <DialogContent className="bg-color-bg-secondary border-color-border-default">
+          <DialogHeader>
+            <DialogTitle className="text-color-text-primary">Aprovar Venda</DialogTitle>
+          </DialogHeader>
+          <p className="text-color-text-secondary">
+            Tem certeza que deseja aprovar a venda{' '}
+            <span className="font-semibold text-color-text-primary">#{approving?.id}</span>? Esta
+            ação não pode ser desfeita.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setApproveOpen(false)}
+              className="text-color-text-secondary hover:text-color-text-primary"
+            >
+              Voltar
+            </Button>
+            <Button
+              onClick={handleApprove}
+              disabled={approveLoading}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {approveLoading ? 'Aprovando...' : 'Aprovar Venda'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -6,6 +6,7 @@ import {
   Package,
   PanelRightClose,
   PanelRightOpen,
+  Settings,
   Sun,
   Tags,
   User,
