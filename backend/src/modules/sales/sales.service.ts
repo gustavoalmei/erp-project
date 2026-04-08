@@ -341,7 +341,7 @@ export const salesService = {
         status: { not: 'CANCELLED' },
         createdAt: {
           gte: new Date(`${currentYear}-01-01`),
-          lte: new Date(`${currentYear}-12-31`),
+          lt: new Date(`${currentYear + 1}-01-01`),
         },
       },
       select: {

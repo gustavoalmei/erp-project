@@ -47,6 +47,6 @@ router.patch(
 )
 
 // Cancelamento: ADMIN
-router.delete('/:id', authorize('ADMIN'), salesController.cancel)
+router.delete('/:id', authorize('SUPERVISOR'), salesController.cancel)
 
 export default router

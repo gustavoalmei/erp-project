@@ -11,6 +11,7 @@ import { Layout } from './components/layout'
 import { Users } from './pages/users'
 import { Customers } from './pages/customers'
 import { NotFound } from './pages/NotFound'
+import { Sell } from './pages/sell'
 
 function App() {
   return (
@@ -77,6 +78,15 @@ function App() {
         element={
           <PrivateRoute allowedRoles={['ADMIN']}>
             <Layout element={<Users />} />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/sell"
+        element={
+          <PrivateRoute allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR']}>
+            <Layout element={<Sell />} />
           </PrivateRoute>
         }
       />

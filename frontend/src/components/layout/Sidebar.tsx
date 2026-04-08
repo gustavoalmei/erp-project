@@ -58,6 +58,13 @@ export function Sidebar() {
       havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR'],
     },
     {
+      icon: <CreditCard className="w-5 h-5" />,
+      label: 'Vendas',
+      path: '/sell',
+      redirect: '/sell',
+      havePermission: ['ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR'],
+    },
+    {
       icon: <Users className="w-5 h-5" />,
       label: 'Clientes',
       path: '/clients',
@@ -306,7 +313,6 @@ export function Sidebar() {
               dark:hover:text-color-text-primary
               text-color-text-primary 
               font-bold 
-              rounded-full
               overflow-hidden
               select-none"
                     >
@@ -482,7 +488,6 @@ export function Sidebar() {
                           bg-color-surface 
                           text-color-text-primary
                           font-bold 
-                          rounded-full
                           overflow-hidden
                           select-none"
                         >
@@ -574,7 +579,6 @@ export function Sidebar() {
               dark:hover:text-color-text-primary
               text-color-text-primary 
               font-bold 
-              rounded-full
               overflow-hidden
               select-none"
                   >
