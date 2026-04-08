@@ -526,14 +526,16 @@ export function Sell() {
                         <TableHead className="text-color-text-primary text-right">
                           Subtotal
                         </TableHead>
-                        <TableHead />
+                        <TableHead className="w-2" />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {cart.map((item) => (
                         <TableRow key={item.product.id} className="border-color-border-default">
-                          <TableCell className="text-color-text-primary font-medium py-2">
-                            {item.product.name}
+                          <TableCell className="text-color-text-primary font-medium py-2 max-w-[180px]">
+                            <span className="block truncate" title={item.product.name}>
+                              {item.product.name}
+                            </span>
                           </TableCell>
                           <TableCell className="text-center py-2">
                             <Input
@@ -547,10 +549,13 @@ export function Sell() {
                               className="w-16 text-center bg-color-surface border-color-border-default text-color-text-primary mx-auto"
                             />
                           </TableCell>
-                          <TableCell className="text-right text-color-text-primary py-2">
+                          <TableCell
+                            className="text-right text-color-text-primary py-2"
+                            align="right"
+                          >
                             {formatCurrency(item.product.price * item.quantity)}
                           </TableCell>
-                          <TableCell className="py-2">
+                          <TableCell className="py-2" align="right">
                             <Button
                               variant="ghost"
                               size="icon"
