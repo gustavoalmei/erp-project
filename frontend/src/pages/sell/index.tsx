@@ -526,7 +526,7 @@ export function Sell() {
                         <TableHead className="text-color-text-primary text-right">
                           Subtotal
                         </TableHead>
-                        <TableHead className='w-2' />
+                        <TableHead className="w-2" />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -549,10 +549,13 @@ export function Sell() {
                               className="w-16 text-center bg-color-surface border-color-border-default text-color-text-primary mx-auto"
                             />
                           </TableCell>
-                          <TableCell className="text-right text-color-text-primary py-2" align='right'>
+                          <TableCell
+                            className="text-right text-color-text-primary py-2"
+                            align="right"
+                          >
                             {formatCurrency(item.product.price * item.quantity)}
                           </TableCell>
-                          <TableCell className="py-2" align='right'>
+                          <TableCell className="py-2" align="right">
                             <Button
                               variant="ghost"
                               size="icon"
