@@ -20,7 +20,18 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Plus, Search, ShoppingCart, Trash2, Eye, X, ChevronUp, ChevronDown, ChevronsUpDown, Check } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  ShoppingCart,
+  Trash2,
+  Eye,
+  X,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  Check,
+} from 'lucide-react'
 import { toast } from 'react-toastify'
 
 const formatCurrency = (value: number) =>
@@ -70,7 +81,6 @@ export function Sell() {
   const [sortKey, setSortKey] = useState<SortKey | null>(null)
   const [sortDir, setSortDir] = useState<SortDir>('none')
 
-
   // Modal nova venda
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState<SaleForm>(EMPTY_FORM)
@@ -100,7 +110,9 @@ export function Sell() {
         customerService.getAll(),
         productService.getAll(),
       ])
-      setSales(salesData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+      setSales(
+        salesData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+      )
       setFiltered(salesData)
       setCustomers(customersData.sort((a, b) => a.name.localeCompare(b.name)))
       setProducts(productsData.sort((a, b) => a.name.localeCompare(b.name)))
@@ -209,9 +221,7 @@ export function Sell() {
     if (quantity <= 0) {
       setCart((prev) => prev.filter((i) => i.product.id !== productId))
     } else {
-      setCart((prev) =>
-        prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i)),
-      )
+      setCart((prev) => prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i)))
     }
   }
 
@@ -289,7 +299,6 @@ export function Sell() {
     }
   }
 
-
   return (
     <Card className="p-4 border-color-border-default cursor-default">
       {/* Header */}
@@ -344,7 +353,9 @@ export function Sell() {
                     className={`text-color-text-primary select-none cursor-pointer hover:text-color-text-primary ${right ? 'text-right' : ''}`}
                     onClick={() => handleSort(key)}
                   >
-                    <span className={`inline-flex items-center gap-1 ${right ? 'justify-end w-full' : ''}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 ${right ? 'justify-end w-full' : ''}`}
+                    >
                       {label}
                       {sortKey === key && sortDir === 'asc' ? (
                         <ChevronUp className="w-3.5 h-3.5" />
@@ -400,7 +411,7 @@ export function Sell() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          title='Visualizar Venda'
+                          title="Visualizar Venda"
                           variant="ghost"
                           size="icon"
                           onClick={() => openDetail(sale)}
@@ -411,7 +422,7 @@ export function Sell() {
                         {sale.status === 'PENDING' && (
                           <>
                             <Button
-                              title='Cancelar Venda'
+                              title="Cancelar Venda"
                               variant="ghost"
                               size="icon"
                               onClick={() => openCancel(sale)}
@@ -420,7 +431,7 @@ export function Sell() {
                               <X className="w-4 h-4" />
                             </Button>
                             <Button
-                              title='Aprovar Venda'
+                              title="Aprovar Venda"
                               variant="ghost"
                               size="icon"
                               onClick={() => openApprove(sale)}
@@ -452,7 +463,9 @@ export function Sell() {
               <Label className="text-color-text-primary">Cliente *</Label>
               <select
                 value={form.customerId}
-                onChange={(e) => setForm((prev) => ({ ...prev, customerId: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, customerId: Number(e.target.value) }))
+                }
                 className="h-10 w-full rounded-md border border-color-border-default bg-color-surface px-3 text-sm text-color-text-primary focus:outline-none focus:ring-2 focus:ring-color-primary"
               >
                 <option value={0} disabled>
@@ -489,7 +502,9 @@ export function Sell() {
                     >
                       <span>
                         <span className="font-medium">{p.name}</span>
-                        <span className="text-color-text-secondary ml-2 font-mono text-xs">{p.sku}</span>
+                        <span className="text-color-text-secondary ml-2 font-mono text-xs">
+                          {p.sku}
+                        </span>
                       </span>
                       <span className="text-color-text-secondary">{formatCurrency(p.price)}</span>
                     </button>
@@ -508,7 +523,9 @@ export function Sell() {
                       <TableRow className="border-color-border-default">
                         <TableHead className="text-color-text-primary">Produto</TableHead>
                         <TableHead className="text-color-text-primary text-center">Qtd</TableHead>
-                        <TableHead className="text-color-text-primary text-right">Subtotal</TableHead>
+                        <TableHead className="text-color-text-primary text-right">
+                          Subtotal
+                        </TableHead>
                         <TableHead />
                       </TableRow>
                     </TableHeader>
@@ -577,16 +594,16 @@ export function Sell() {
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="bg-color-bg-secondary border-color-border-default max-w-lg text-color-text-primary">
           <DialogHeader>
-            <DialogTitle className="text-color-text-primary">
-              Venda #{selectedSale?.id}
-            </DialogTitle>
+            <DialogTitle className="text-color-text-primary">Venda #{selectedSale?.id}</DialogTitle>
           </DialogHeader>
           {selectedSale && (
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <p className="text-color-text-secondary">Cliente</p>
-                  <p className="text-color-text-primary font-medium">{selectedSale.customer?.name}</p>
+                  <p className="text-color-text-primary font-medium">
+                    {selectedSale.customer?.name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-color-text-secondary">Vendedor</p>
@@ -611,7 +628,9 @@ export function Sell() {
                     <TableRow className="border-color-border-default">
                       <TableHead className="text-color-text-primary">Produto</TableHead>
                       <TableHead className="text-color-text-primary text-center">Qtd</TableHead>
-                      <TableHead className="text-color-text-primary text-right">Preço Unit.</TableHead>
+                      <TableHead className="text-color-text-primary text-right">
+                        Preço Unit.
+                      </TableHead>
                       <TableHead className="text-color-text-primary text-right">Subtotal</TableHead>
                     </TableRow>
                   </TableHeader>

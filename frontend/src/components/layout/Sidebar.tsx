@@ -6,7 +6,6 @@ import {
   Package,
   PanelRightClose,
   PanelRightOpen,
-  Settings,
   Sun,
   Tags,
   User,
@@ -314,7 +313,6 @@ export function Sidebar() {
               dark:hover:text-color-text-primary
               text-color-text-primary 
               font-bold 
-              rounded-full
               overflow-hidden
               select-none"
                     >
@@ -490,7 +488,6 @@ export function Sidebar() {
                           bg-color-surface 
                           text-color-text-primary
                           font-bold 
-                          rounded-full
                           overflow-hidden
                           select-none"
                         >
@@ -582,7 +579,6 @@ export function Sidebar() {
               dark:hover:text-color-text-primary
               text-color-text-primary 
               font-bold 
-              rounded-full
               overflow-hidden
               select-none"
                   >
