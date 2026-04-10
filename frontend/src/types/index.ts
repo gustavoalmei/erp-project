@@ -113,6 +113,27 @@ export interface SaleForm {
   items: CreateSaleItem[]
 }
 
+// System Settings
+export interface SystemSettings {
+  id: number
+  companyName: string
+  hasLogo: boolean
+  defaultTheme: 'light' | 'dark' | 'system'
+  colorPrimary: string
+  colorPrimaryHover: string
+  colorPrimaryActive: string
+  colorAccent: string
+  colorBgPrimary: string
+  colorBgSecondary: string
+  colorSurface: string
+  colorTextPrimary: string
+  colorTextSecondary: string
+  colorTextMuted: string
+  colorTextInverse: string
+  colorBorderDefault: string
+  colorBorderStrong: string
+}
+
 // Activity Log
 export interface ActivityLog {
   id: number

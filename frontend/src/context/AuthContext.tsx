@@ -1,10 +1,9 @@
 import { useState, useEffect, useLayoutEffect, type ReactNode } from 'react'
-import { Bounce, ToastContainer, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { authService, userService } from '@/services/api'
 import type { LoginForm, LoginResponse, RegisterForm, RegisterResponse, User } from '@/types'
 import { AuthContext, type ToastData } from './auth-context'
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(
@@ -84,19 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isMobile,
       }}
     >
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable
-        pauseOnHover={false}
-        theme="dark"
-        transition={Bounce}
-      />
       {children}
     </AuthContext.Provider>
   )

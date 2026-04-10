@@ -7,6 +7,7 @@ import customersRoutes from './modules/customers/customers.routes'
 import salesRoutes from './modules/sales/sales.routes'
 import usersRoutes from './modules/users/users.routes'
 import logsRoutes from './modules/logs/logs.routes'
+import settingsRoutes from './modules/settings/settings.routes'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 
@@ -25,7 +26,7 @@ export function createApp(options: AppOptions = {}) {
       credentials: true,
     }),
   )
-  app.use(express.json({ limit: '1mb' }))
+  app.use(express.json({ limit: '5mb' }))
   app.use(
     helmet({
       hsts: { maxAge: 31536000, includeSubDomains: true },
@@ -59,6 +60,7 @@ export function createApp(options: AppOptions = {}) {
   app.use('/api/sales', salesRoutes)
   app.use('/api/users', usersRoutes)
   app.use('/api/logs', logsRoutes)
+  app.use('/api/settings', settingsRoutes)
 
   return app
 }
