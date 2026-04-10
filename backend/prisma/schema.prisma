@@ -9,11 +9,17 @@ datasource db {
 }
 
 enum Role {
-  ADMIN       // Administrador do sistema
-  MANAGER     // Gestor / Diretor
-  SUPERVISOR  // Líder de área / supervisor
-  OPERATOR    // Usuário operacional / colaborador
-  VIEWER      // Usuário limitado / leitura
+  ADMIN // Administrador do sistema
+  MANAGER // Gestor / Diretor
+  SUPERVISOR // Líder de área / supervisor
+  OPERATOR // Usuário operacional / colaborador
+  VIEWER // Usuário limitado / leitura
+}
+
+enum Theme {
+  light
+  dark
+  system
 }
 
 enum SaleStatus {
@@ -134,4 +140,34 @@ model ActivityLog {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("activity_logs")
+}
+
+model SystemSettings {
+  id           Int     @id @default(1)
+  companyName  String  @default("Minha Empresa")
+  logoBase64   String? // imagem em base64
+  defaultTheme Theme   @default(system) // "light" | "dark" | "system"
+
+  // Cor primária
+  colorPrimary       String @default("#f24987")
+  colorPrimaryHover  String @default("#db3f78")
+  colorPrimaryActive String @default("#c53569")
+
+  // Accent
+  colorAccent String @default("#b2bf4b")
+
+  // Fundos
+  colorBgPrimary   String @default("#ffffff")
+  colorBgSecondary String @default("#f7f7f7")
+  colorSurface     String @default("#ffffff")
+
+  // Textos
+  colorTextPrimary   String @default("#262626")
+  colorTextSecondary String @default("#5f6b73")
+  colorTextMuted     String @default("#8c959c")
+  colorTextInverse   String @default("#ffffff")
+
+  // Bordas
+  colorBorderDefault String @default("#d9d9d9")
+  colorBorderStrong  String @default("#5f6b73")
 }

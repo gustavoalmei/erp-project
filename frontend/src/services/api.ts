@@ -13,6 +13,7 @@ import type {
   SaleForm,
   User,
   UserForm,
+  SystemSettings,
 } from '../types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
@@ -292,5 +293,31 @@ export const saleService = {
       count: number
     }>('/sales/pending')
     return response.data
+  },
+}
+
+// ========== SETTINGS ==========
+export const settingsService = {
+  getSettings: async () => {
+    const response = await api.get<SystemSettings>('/settings')
+    return response.data
+  },
+
+  getLogo: async () => {
+    const response = await api.get<{ logoBase64: string | null }>('/settings/logo')
+    return response.data
+  },
+
+  updateSettings: async (data: Partial<Omit<SystemSettings, 'id' | 'hasLogo'>>) => {
+    const response = await api.put<SystemSettings>('/settings', data)
+    return response.data
+  },
+
+  updateLogo: async (logo: string) => {
+    await api.post('/settings/logo', { logo })
+  },
+
+  deleteLogo: async () => {
+    await api.delete('/settings/logo')
   },
 }

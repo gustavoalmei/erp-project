@@ -2,19 +2,18 @@ import {
   CreditCard,
   LayoutDashboard,
   LogOut,
-  Moon,
   Package,
   PanelRightClose,
   PanelRightOpen,
-  Sun,
+  Settings,
   Tags,
   User,
   Users,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useTheme } from '../../hooks/use-theme.ts'
 import { useAuth } from '@/hooks/useAuth'
+import { settingsService } from '@/services/api'
 import { Card } from '../ui/card'
 import {
   DropdownMenu,
@@ -29,9 +28,27 @@ import { getRoleLabel, getRoleColor } from '@/utils/document'
 
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const [systemLogo, setSystemLogo] = useState<string | null>(null)
+  const [companyName, setCompanyName] = useState('ERP System')
   const { user, isMobile, logout } = useAuth()
   const location = useLocation()
+
+  const loadSettings = () => {
+    settingsService
+      .getSettings()
+      .then((s) => setCompanyName(s.companyName))
+      .catch(() => {})
+    settingsService
+      .getLogo()
+      .then(({ logoBase64 }) => setSystemLogo(logoBase64))
+      .catch(() => {})
+  }
+
+  useEffect(() => {
+    loadSettings()
+    window.addEventListener('settings-updated', loadSettings)
+    return () => window.removeEventListener('settings-updated', loadSettings)
+  }, [])
   const initials = user?.name
     ? user.name.charAt(0).toUpperCase() + user.name.split(' ').pop()?.charAt(0).toUpperCase()
     : ''
@@ -76,6 +93,13 @@ export function Sidebar() {
       label: 'Usuários',
       path: '/users',
       redirect: '/users',
+      havePermission: ['ADMIN'],
+    },
+    {
+      icon: <Settings className="w-5 h-5" />,
+      label: 'Configurações',
+      path: '/settings',
+      redirect: '/settings',
       havePermission: ['ADMIN'],
     },
   ]
@@ -123,7 +147,17 @@ export function Sidebar() {
           >
             {isExpanded ? <PanelRightOpen /> : <PanelRightClose />}
           </div>
-          <h1 className="text-2xl text-color-text-primary">ERP System</h1>
+          <div className="flex items-center gap-2">
+            {systemLogo && (
+              <img src={systemLogo} alt="Logo" className="h-8 w-auto object-contain" />
+            )}
+            <h1
+              className="text-2xl text-color-text-primary truncate max-w-[200px]"
+              title={companyName}
+            >
+              {companyName}
+            </h1>
+          </div>
           <div className="w-[36px]"></div>
         </div>
 
@@ -218,7 +252,7 @@ export function Sidebar() {
                   cursor-pointer"
                         >
                           <div
-                            className="w-12 h-10 
+                            className="max-w-10 w-full h-10 
                     flex items-center justify-center 
                     rounded-full 
                     bg-color-surface 
@@ -304,7 +338,7 @@ export function Sidebar() {
                     </DropdownMenu>
                   ) : (
                     <div
-                      className="w-10 h-10 
+                      className="max-w-10 w-full h-10 
               flex items-center justify-center 
               rounded-lg 
               bg-color-surface 
@@ -326,61 +360,6 @@ export function Sidebar() {
                         initials
                       )}
                     </div>
-                  )}
-                </div>
-                <div
-                  onClick={() => {
-                    if (!isExpanded) setIsExpanded(!isExpanded)
-                  }}
-                  className={`
-            flex justify-center 
-            bg-color-surface 
-            gap-1 
-            transition-colors 
-            cursor-pointer 
-            rounded-lg 
-            ${isExpanded ? 'p-1' : 'p-2'}`}
-                >
-                  {isExpanded ? (
-                    <>
-                      <div
-                        onClick={() => setTheme('light')}
-                        className={`w-full 
-                      flex justify-center 
-                      rounded-lg 
-                      p-1 
-                      hover:bg-color-primary 
-                      hover:text-color-text-inverse
-                      dark:hover:text-color-text-primary
-                      transition-colors 
-                      ${theme === 'dark' ? 'bg-color-surface text-color-text-primary' : 'bg-color-primary text-color-text-inverse'}`}
-                      >
-                        <Sun className="w-5 h-5" />
-                      </div>
-                      <div
-                        onClick={() => setTheme('dark')}
-                        className={`w-full 
-                      flex justify-center 
-                      rounded-lg 
-                      p-1 
-                      hover:bg-color-primary 
-                      hover:text-color-text-inverse
-                      dark:hover:text-color-text-primary
-                      text-color-text-primary 
-                      transition-colors 
-                      ${theme === 'light' ? 'bg-color-surface' : 'bg-color-primary'}`}
-                      >
-                        <Moon className="w-5 h-5" />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {theme === 'light' ? (
-                        <Sun className="w-5 h-5 text-color-text-primary" />
-                      ) : (
-                        <Moon className="w-5 h-5 text-color-text-primary" />
-                      )}
-                    </>
                   )}
                 </div>
               </div>
@@ -408,18 +387,40 @@ export function Sidebar() {
             flex-col justify-between"
           >
             <div className="flex flex-col items-end">
-              <div
-                className="
-                h-10
-                flex items-center
-                cursor-pointer
-                bg-color-surface hover:bg-color-primary-hover
-                dark:bg-color-surface dark:hover:bg-color-primary-hover
-                text-color-text-primary hover:text-color-text-inverse dark:text-color-text-primary
-                transition-colors rounded-lg p-1.5"
-                onClick={() => setIsExpanded(!isExpanded)}
-              >
-                {isExpanded ? <PanelRightOpen /> : <PanelRightClose />}
+              <div className="w-full flex items-center justify-between mb-1">
+                {isExpanded ? (
+                  <div className="flex items-center gap-2 overflow-hidden pl-1">
+                    {systemLogo ? (
+                      <img
+                        src={systemLogo}
+                        alt="Logo"
+                        className="h-7 w-auto object-contain shrink-0"
+                      />
+                    ) : null}
+                    <span className="text-sm font-semibold text-color-text-primary truncate">
+                      {companyName}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="w-9 h-9 flex items-center justify-center">
+                    {systemLogo ? (
+                      <img src={systemLogo} alt="Logo" className="h-7 w-7 object-contain" />
+                    ) : null}
+                  </div>
+                )}
+                <div
+                  className="
+                  h-10 shrink-0
+                  flex items-center
+                  cursor-pointer
+                  bg-color-surface hover:bg-color-primary-hover
+                  dark:bg-color-surface dark:hover:bg-color-primary-hover
+                  text-color-text-primary hover:text-color-text-inverse dark:text-color-text-primary
+                  transition-colors rounded-lg p-1.5"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  {isExpanded ? <PanelRightOpen /> : <PanelRightClose />}
+                </div>
               </div>
               <ul className="w-full flex flex-col gap-2 mt-2">
                 {menuItems.map((item, index) => {
@@ -482,7 +483,7 @@ export function Sidebar() {
                         cursor-pointer"
                       >
                         <div
-                          className="w-12 h-10 
+                          className="max-w-10 w-full h-10 
                           flex items-center justify-center 
                           rounded-full 
                           bg-color-surface 
@@ -570,7 +571,7 @@ export function Sidebar() {
                   </DropdownMenu>
                 ) : (
                   <div
-                    className="w-10 h-10 
+                    className="max-w-10 w-full h-10 
               flex items-center justify-center 
               rounded-lg 
               bg-color-surface 
@@ -592,61 +593,6 @@ export function Sidebar() {
                       initials
                     )}
                   </div>
-                )}
-              </div>
-              <div
-                onClick={() => {
-                  if (!isExpanded) setIsExpanded(!isExpanded)
-                }}
-                className={`
-            flex justify-center 
-            bg-color-surface 
-            gap-1 
-            transition-colors 
-            cursor-pointer 
-            rounded-lg 
-            ${isExpanded ? 'p-1' : 'p-2'}`}
-              >
-                {isExpanded ? (
-                  <>
-                    <div
-                      onClick={() => setTheme('light')}
-                      className={`w-full 
-                      flex justify-center 
-                      rounded-lg 
-                      p-1 
-                      hover:bg-color-primary 
-                      hover:text-color-text-inverse
-                      dark:hover:text-color-text-primary
-                      transition-colors 
-                      ${theme === 'dark' ? 'bg-color-surface text-color-text-primary' : 'bg-color-primary text-color-text-inverse'}`}
-                    >
-                      <Sun className="w-5 h-5" />
-                    </div>
-                    <div
-                      onClick={() => setTheme('dark')}
-                      className={`w-full 
-                      flex justify-center 
-                      rounded-lg 
-                      p-1 
-                      hover:bg-color-primary 
-                      hover:text-color-text-inverse
-                      dark:hover:text-color-text-primary
-                      text-color-text-primary 
-                      transition-colors 
-                      ${theme === 'light' ? 'bg-color-surface' : 'bg-color-primary'}`}
-                    >
-                      <Moon className="w-5 h-5" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {theme === 'light' ? (
-                      <Sun className="w-5 h-5 text-color-text-primary" />
-                    ) : (
-                      <Moon className="w-5 h-5 text-color-text-primary" />
-                    )}
-                  </>
                 )}
               </div>
             </div>
