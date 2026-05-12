@@ -241,7 +241,10 @@ export const dashboardService = {
       }
       today: { totalRevenue: number; totalSales: number }
       pending: { totalPending: number; count: number }
-      lowStock: { count: number; products: { id: number; name: string; stock: number; sku: string }[] }
+      lowStock: {
+        count: number
+        products: { id: number; name: string; stock: number; sku: string }[]
+      }
       monthlyRevenue: { month: string; revenue: number }[]
       topProducts: { id: number; name: string; price: number; stock: number; totalSold: number }[]
       topCustomers: { id: number; name: string; totalSpent: number; totalPurchases: number }[]

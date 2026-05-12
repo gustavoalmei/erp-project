@@ -36,7 +36,10 @@ export function Dashboard() {
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   useEffect(() => {
-    dashboardService.getSummary().then(setData).catch(() => {})
+    dashboardService
+      .getSummary()
+      .then(setData)
+      .catch(() => {})
   }, [])
 
   const monthlyRevenue = data?.monthlyRevenue ?? []
@@ -242,7 +245,9 @@ export function Dashboard() {
                   <TableHead className="min-w-[250px] font-bold">Produto</TableHead>
                   <TableHead className="min-w-[100px] font-bold">Preço</TableHead>
                   <TableHead className="min-w-[100px] font-bold text-center">Estoque</TableHead>
-                  <TableHead className="min-w-[120px] text-center font-bold">Total Vendido</TableHead>
+                  <TableHead className="min-w-[120px] text-center font-bold">
+                    Total Vendido
+                  </TableHead>
                   <TableHead className="min-w-[150px] text-center font-bold">Valor Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -278,14 +283,18 @@ export function Dashboard() {
                 <TableRow>
                   <TableHead className="min-w-[200px] font-bold">Nome</TableHead>
                   <TableHead className="min-w-[100px] font-bold text-center">Total Gasto</TableHead>
-                  <TableHead className="min-w-[150px] font-bold text-center">Total de Compras</TableHead>
+                  <TableHead className="min-w-[150px] font-bold text-center">
+                    Total de Compras
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(data?.topCustomers ?? []).map((customer) => (
                   <TableRow key={customer.id} className="hover:bg-color-bg-secondary">
                     <TableCell>{customer.name}</TableCell>
-                    <TableCell className="text-center">{formatPrice(customer.totalSpent)}</TableCell>
+                    <TableCell className="text-center">
+                      {formatPrice(customer.totalSpent)}
+                    </TableCell>
                     <TableCell className="text-center">{customer.totalPurchases}</TableCell>
                   </TableRow>
                 ))}
@@ -312,7 +321,9 @@ export function Dashboard() {
                   <TableHead className="min-w-[250px] font-bold">Produto</TableHead>
                   <TableHead className="min-w-[100px] font-bold text-center">Preço</TableHead>
                   <TableHead className="min-w-[100px] font-bold text-center">Estoque</TableHead>
-                  <TableHead className="min-w-[120px] text-center font-bold">Total Vendido</TableHead>
+                  <TableHead className="min-w-[120px] text-center font-bold">
+                    Total Vendido
+                  </TableHead>
                   <TableHead className="min-w-[150px] text-center font-bold">Valor Total</TableHead>
                 </TableRow>
               </TableHeader>

@@ -86,7 +86,9 @@ export function SelectCompanyPage() {
                   )}
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="font-medium text-color-text-primary truncate">{company.name}</span>
+                  <span className="font-medium text-color-text-primary truncate">
+                    {company.name}
+                  </span>
                   <span className="text-xs text-color-text-muted">
                     {ROLE_LABELS[company.role] ?? company.role}
                   </span>
@@ -111,7 +113,10 @@ export function SelectCompanyPage() {
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleCreate()
-                    if (e.key === 'Escape') { setCreating(false); setNewName('') }
+                    if (e.key === 'Escape') {
+                      setCreating(false)
+                      setNewName('')
+                    }
                   }}
                   disabled={submitting}
                 />
@@ -131,7 +136,10 @@ export function SelectCompanyPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => { setCreating(false); setNewName('') }}
+                    onClick={() => {
+                      setCreating(false)
+                      setNewName('')
+                    }}
                     disabled={submitting}
                   >
                     <X className="h-4 w-4" />

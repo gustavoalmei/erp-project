@@ -2,7 +2,14 @@ import { useState, useEffect, useLayoutEffect, type ReactNode } from 'react'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { authService, settingsService, userService } from '@/services/api'
-import type { Company, LoginForm, LoginResponse, RegisterForm, RegisterResponse, User } from '@/types'
+import type {
+  Company,
+  LoginForm,
+  LoginResponse,
+  RegisterForm,
+  RegisterResponse,
+  User,
+} from '@/types'
 import { applySettingsColors } from '@/utils/applySettings'
 import { AuthContext, type ToastData } from './auth-context'
 

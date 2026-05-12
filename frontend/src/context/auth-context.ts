@@ -1,5 +1,12 @@
 import { createContext } from 'react'
-import type { Company, LoginForm, LoginResponse, RegisterForm, RegisterResponse, User } from '@/types'
+import type {
+  Company,
+  LoginForm,
+  LoginResponse,
+  RegisterForm,
+  RegisterResponse,
+  User,
+} from '@/types'
 
 export interface ToastData {
   message: string
