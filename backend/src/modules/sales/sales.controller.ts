@@ -5,13 +5,12 @@ import { logsService } from '../logs/logs.service'
 export const salesController = {
   async create(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const { customerId, items } = req.body
       const userId = req.userId!
 
       if (!customerId || !items || items.length === 0) {
-        return res.status(400).json({
-          error: 'customerId e items são obrigatórios',
-        })
+        return res.status(400).json({ error: 'customerId e items são obrigatórios' })
       }
 
       for (const item of items) {
@@ -28,16 +27,15 @@ export const salesController = {
         quantity: Number(item.quantity),
       }))
 
-      await salesService.createSale(customerIdNumber, itemsConverted, userId)
+      await salesService.createSale(customerIdNumber, itemsConverted, userId, req.companyId)
 
       await logsService.create(
         `Venda criada para cliente #${customerId} (${items.length} item(s))`,
         userId,
+        req.companyId,
       )
 
-      return res.status(201).json({
-        message: 'Venda criada com sucesso',
-      })
+      return res.status(201).json({ message: 'Venda criada com sucesso' })
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'Cliente não encontrado') {
         return res.status(404).json({ error: error.message })
@@ -58,7 +56,8 @@ export const salesController = {
 
   async list(req: Request, res: Response) {
     try {
-      const sales = await salesService.listSales()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const sales = await salesService.listSales(req.companyId)
       return res.status(200).json(sales)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -67,13 +66,14 @@ export const salesController = {
 
   async getById(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = Number(req.params.id)
 
       if (isNaN(id)) {
         return res.status(400).json({ error: 'ID inválido' })
       }
 
-      const sale = await salesService.getSaleById(id)
+      const sale = await salesService.getSaleById(id, req.companyId)
       return res.status(200).json(sale)
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'Venda não encontrada') {
@@ -85,6 +85,7 @@ export const salesController = {
 
   async updateStatus(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = Number(req.params.id)
       const { status } = req.body
 
@@ -96,13 +97,11 @@ export const salesController = {
         return res.status(400).json({ error: 'Status é obrigatório' })
       }
 
-      await salesService.updateSaleStatus(id, status)
+      await salesService.updateSaleStatus(id, status, req.companyId)
 
-      await logsService.create(`Venda #${id} status atualizado: ${status}`, req.userId)
+      await logsService.create(`Venda #${id} status atualizado: ${status}`, req.userId, req.companyId)
 
-      return res.status(200).json({
-        message: 'Status atualizado com sucesso',
-      })
+      return res.status(200).json({ message: 'Status atualizado com sucesso' })
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'Venda não encontrada') {
         return res.status(404).json({ error: error.message })
@@ -116,6 +115,7 @@ export const salesController = {
 
   async cancel(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = Number(req.params.id)
       const userId = req.userId!
 
@@ -123,13 +123,11 @@ export const salesController = {
         return res.status(400).json({ error: 'ID inválido' })
       }
 
-      await salesService.cancelSale(id, userId)
+      await salesService.cancelSale(id, userId, req.companyId)
 
-      await logsService.create(`Venda #${id} cancelada`, userId)
+      await logsService.create(`Venda #${id} cancelada`, userId, req.companyId)
 
-      return res.status(200).json({
-        message: 'Venda cancelada com sucesso',
-      })
+      return res.status(200).json({ message: 'Venda cancelada com sucesso' })
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'Venda não encontrada') {
         return res.status(404).json({ error: error.message })
@@ -143,7 +141,8 @@ export const salesController = {
 
   async getTotalRevenue(req: Request, res: Response) {
     try {
-      const data = await salesService.getTotalRevenue()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const data = await salesService.getTotalRevenue(req.companyId)
       return res.status(200).json(data)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -152,7 +151,8 @@ export const salesController = {
 
   async getStats(req: Request, res: Response) {
     try {
-      const data = await salesService.getStats()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const data = await salesService.getStats(req.companyId)
       return res.status(200).json(data)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -161,13 +161,14 @@ export const salesController = {
 
   async getMonthlyRevenue(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const year = req.query.year ? parseInt(req.query.year as string, 10) : undefined
       const currentYear = new Date().getFullYear()
       if (year && (isNaN(year) || year < 2000 || year > currentYear + 1)) {
         return res.status(400).json({ error: 'Ano inválido.' })
       }
 
-      const data = await salesService.getMonthlyRevenue(year)
+      const data = await salesService.getMonthlyRevenue(req.companyId, year)
       return res.status(200).json(data)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -176,7 +177,8 @@ export const salesController = {
 
   async getTodaySales(req: Request, res: Response) {
     try {
-      const data = await salesService.getTodaySales()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const data = await salesService.getTodaySales(req.companyId)
       return res.status(200).json(data)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -185,7 +187,8 @@ export const salesController = {
 
   async getPendingSales(req: Request, res: Response) {
     try {
-      const data = await salesService.getPendingSales()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const data = await salesService.getPendingSales(req.companyId)
       return res.status(200).json(data)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })

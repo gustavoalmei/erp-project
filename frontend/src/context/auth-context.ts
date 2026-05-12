@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { LoginForm, LoginResponse, RegisterForm, RegisterResponse, User } from '@/types'
+import type { Company, LoginForm, LoginResponse, RegisterForm, RegisterResponse, User } from '@/types'
 
 export interface ToastData {
   message: string
@@ -8,8 +8,12 @@ export interface ToastData {
 
 export interface AuthContextType {
   user: User | null
+  companies: Company[]
   loading: boolean
   login: (data: LoginForm) => Promise<LoginResponse>
+  switchCompany: () => Promise<void>
+  createCompany: (name: string) => Promise<void>
+  selectCompany: (companyId: number) => Promise<void>
   register: (data: RegisterForm) => Promise<RegisterResponse>
   logout: () => void
   updateUser: (updated: User) => void

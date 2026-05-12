@@ -5,25 +5,15 @@ import { authorize } from '../../middlewares/authorize'
 
 const router = Router()
 
-// Rotas públicas
-router.get('/', productsController.list)
-router.get('/low-stock', productsController.getLowStock)
-router.get('/top-selling', productsController.topSelling)
-router.get('/:id', productsController.getById)
+router.use(authMiddleware)
 
-// Rotas protegidas
-router.post(
-  '/',
-  authMiddleware,
-  authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'),
-  productsController.create,
-)
-router.put(
-  '/:id',
-  authMiddleware,
-  authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'),
-  productsController.update,
-)
-router.delete('/:id', authMiddleware, authorize('ADMIN'), productsController.delete)
+router.get('/', authorize('ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER'), productsController.list)
+router.get('/low-stock', authorize('ADMIN', 'MANAGER', 'SUPERVISOR', 'VIEWER'), productsController.getLowStock)
+router.get('/top-selling', authorize('ADMIN', 'MANAGER', 'VIEWER'), productsController.topSelling)
+router.get('/:id', authorize('ADMIN', 'MANAGER', 'SUPERVISOR', 'OPERATOR', 'VIEWER'), productsController.getById)
+
+router.post('/', authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'), productsController.create)
+router.put('/:id', authorize('ADMIN', 'SUPERVISOR', 'OPERATOR'), productsController.update)
+router.delete('/:id', authorize('ADMIN'), productsController.delete)
 
 export default router

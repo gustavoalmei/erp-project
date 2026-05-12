@@ -27,8 +27,7 @@ export function LoginPage() {
     e.preventDefault()
     await login({ email, password })
       .then(() => {
-        showToast({ type: 'success', message: 'Login realizado com sucesso' })
-        navigate('/')
+        navigate('/select-company', { replace: true })
       })
       .catch((error) => {
         showToast({ type: 'error', message: error.response.data.error })

@@ -33,15 +33,44 @@ enum MovementType {
   OUT
 }
 
-model User {
+model Company {
   id        Int      @id @default(autoincrement())
   name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(OPERATOR)
   createdAt DateTime @default(now()) @map("created_at")
-  avatar    String?
 
+  users        UserCompany[]
+  settings     SystemSettings?
+  products     Product[]
+  categories   Category[]
+  customers    Customer[]
+  sales        Sale[]
+  activityLogs ActivityLog[]
+
+  @@map("companies")
+}
+
+model UserCompany {
+  userId    Int  @map("user_id")
+  companyId Int  @map("company_id")
+  role      Role
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, companyId])
+  @@map("user_companies")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  password     String
+  isSuperAdmin Boolean  @default(false) @map("is_super_admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+  avatar       String?
+
+  companies      UserCompany[]
   sales          Sale[]
   stockMovements StockMovement[]
   activityLogs   ActivityLog[]
@@ -50,8 +79,11 @@ model User {
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
+  id        Int     @id @default(autoincrement())
+  name      String
+  companyId Int     @map("company_id")
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   products Product[]
 
   @@map("categories")
@@ -63,27 +95,34 @@ model Product {
   description String?
   price       Decimal  @db.Decimal(10, 2)
   stock       Int      @default(0)
-  sku         String   @unique
+  sku         String
   categoryId  Int      @map("category_id")
+  companyId   Int      @map("company_id")
   createdAt   DateTime @default(now()) @map("created_at")
 
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   category       Category        @relation(fields: [categoryId], references: [id])
   saleItems      SaleItem[]
   stockMovements StockMovement[]
 
+  @@unique([companyId, sku])
   @@map("products")
 }
 
 model Customer {
-  id       Int     @id @default(autoincrement())
-  name     String
-  email    String  @unique
-  phone    String
-  document String  @unique
-  address  String?
+  id        Int     @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  document  String
+  address   String?
+  companyId Int     @map("company_id")
 
-  sales Sale[]
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sales   Sale[]
 
+  @@unique([companyId, email])
+  @@unique([companyId, document])
   @@map("customers")
 }
 
@@ -91,10 +130,12 @@ model Sale {
   id         Int        @id @default(autoincrement())
   customerId Int        @map("customer_id")
   userId     Int        @map("user_id")
+  companyId  Int        @map("company_id")
   total      Decimal    @db.Decimal(10, 2)
   status     SaleStatus @default(PENDING)
   createdAt  DateTime   @default(now()) @map("created_at")
 
+  company  Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   customer Customer   @relation(fields: [customerId], references: [id])
   user     User       @relation(fields: [userId], references: [id])
   items    SaleItem[]
@@ -134,40 +175,41 @@ model StockMovement {
 model ActivityLog {
   id        Int      @id @default(autoincrement())
   userId    Int?     @map("user_id")
+  companyId Int?     @map("company_id")
   message   String
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
   @@map("activity_logs")
 }
 
 model SystemSettings {
-  id           Int     @id @default(1)
-  companyName  String  @default("Minha Empresa")
-  logoBase64   String? // imagem em base64
-  defaultTheme Theme   @default(system) // "light" | "dark" | "system"
+  companyId    Int     @id @map("company_id")
+  companyName  String  @default("Minha Empresa") @map("company_name")
+  logoBase64   String? @map("logo_base64")
+  defaultTheme Theme   @default(system) @map("default_theme")
 
-  // Cor primária
-  colorPrimary       String @default("#f24987")
-  colorPrimaryHover  String @default("#db3f78")
-  colorPrimaryActive String @default("#c53569")
+  colorPrimary       String @default("#f24987") @map("color_primary")
+  colorPrimaryHover  String @default("#db3f78") @map("color_primary_hover")
+  colorPrimaryActive String @default("#c53569") @map("color_primary_active")
 
-  // Accent
-  colorAccent String @default("#b2bf4b")
+  colorAccent String @default("#b2bf4b") @map("color_accent")
 
-  // Fundos
-  colorBgPrimary   String @default("#ffffff")
-  colorBgSecondary String @default("#f7f7f7")
-  colorSurface     String @default("#ffffff")
+  colorBgPrimary   String @default("#ffffff") @map("color_bg_primary")
+  colorBgSecondary String @default("#f7f7f7") @map("color_bg_secondary")
+  colorSurface     String @default("#ffffff") @map("color_surface")
 
-  // Textos
-  colorTextPrimary   String @default("#262626")
-  colorTextSecondary String @default("#5f6b73")
-  colorTextMuted     String @default("#8c959c")
-  colorTextInverse   String @default("#ffffff")
+  colorTextPrimary   String @default("#262626") @map("color_text_primary")
+  colorTextSecondary String @default("#5f6b73") @map("color_text_secondary")
+  colorTextMuted     String @default("#8c959c") @map("color_text_muted")
+  colorTextInverse   String @default("#ffffff") @map("color_text_inverse")
 
-  // Bordas
-  colorBorderDefault String @default("#d9d9d9")
-  colorBorderStrong  String @default("#5f6b73")
+  colorBorderDefault String @default("#d9d9d9") @map("color_border_default")
+  colorBorderStrong  String @default("#5f6b73") @map("color_border_strong")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("system_settings")
 }

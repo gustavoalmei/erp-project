@@ -6,6 +6,7 @@ import { settingsService } from './services/api'
 import { applySettingsColors } from './utils/applySettings'
 import { LoginPage } from './pages/auth/Login'
 import { RegisterPage } from './pages/auth/Register'
+import { SelectCompanyPage } from './pages/auth/SelectCompany'
 import { Dashboard } from './pages/dashboard'
 import { Products } from './pages/products'
 import { Categories } from './pages/categories'
@@ -65,6 +66,7 @@ function App() {
             </PublicRoute>
           }
         />
+        <Route path="/select-company" element={<SelectCompanyPage />} />
         <Route
           path="/dashboard"
           element={

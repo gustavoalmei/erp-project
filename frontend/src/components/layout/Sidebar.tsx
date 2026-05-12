@@ -1,4 +1,5 @@
 import {
+  Building2,
   CreditCard,
   LayoutDashboard,
   LogOut,
@@ -30,7 +31,7 @@ export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [systemLogo, setSystemLogo] = useState<string | null>(null)
   const [companyName, setCompanyName] = useState('ERP System')
-  const { user, isMobile, logout } = useAuth()
+  const { user, isMobile, logout, switchCompany } = useAuth()
   const location = useLocation()
 
   const loadSettings = () => {
@@ -120,6 +121,15 @@ export function Sidebar() {
         setIsExpanded(false)
       },
       icon: <CreditCard className="w-5 h-5" />,
+    },
+    {
+      label: 'Trocar empresa',
+      path: '',
+      onClick: () => {
+        setIsExpanded(false)
+        switchCompany()
+      },
+      icon: <Building2 className="w-5 h-5" />,
     },
     {
       label: 'Logout',

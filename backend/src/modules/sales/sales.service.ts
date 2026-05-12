@@ -8,24 +8,22 @@ interface CreateSaleItem {
 }
 
 export const salesService = {
-  async createSale(customerId: number, items: CreateSaleItem[], userId: number) {
+  async createSale(customerId: number, items: CreateSaleItem[], userId: number, companyId: number) {
     return await prisma.$transaction(async (tx) => {
-      // 1. Validar cliente
-      const customer = await tx.customer.findUnique({
-        where: { id: customerId },
+      const customer = await tx.customer.findFirst({
+        where: { id: customerId, companyId },
       })
 
       if (!customer) {
         throw new Error('Cliente não encontrado')
       }
 
-      // 2. Validar produtos e calcular valores
       let totalSale = 0
       const saleItemsData = []
 
       for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
+        const product = await tx.product.findFirst({
+          where: { id: item.productId, companyId },
         })
 
         if (!product) {
@@ -45,23 +43,15 @@ export const salesService = {
           productId: item.productId,
           quantity: item.quantity,
           unitPrice: product.price,
-          subtotal: subtotal,
+          subtotal,
         })
       }
 
-      // 3. Criar a venda
       const sale = await tx.sale.create({
-        data: {
-          customerId,
-          userId,
-          total: totalSale,
-          status: 'PENDING',
-        },
+        data: { customerId, userId, companyId, total: totalSale, status: 'PENDING' },
       })
 
-      // 4. Criar itens, atualizar estoque e registrar movimentações
       for (const itemData of saleItemsData) {
-        // Criar item da venda
         await tx.saleItem.create({
           data: {
             saleId: sale.id,
@@ -72,17 +62,11 @@ export const salesService = {
           },
         })
 
-        // Atualizar estoque
         await tx.product.update({
           where: { id: itemData.productId },
-          data: {
-            stock: {
-              decrement: itemData.quantity,
-            },
-          },
+          data: { stock: { decrement: itemData.quantity } },
         })
 
-        // Criar movimentação de estoque
         await tx.stockMovement.create({
           data: {
             productId: itemData.productId,
@@ -94,34 +78,14 @@ export const salesService = {
         })
       }
 
-      // 5. Retornar venda completa
       return await tx.sale.findUnique({
         where: { id: sale.id },
         include: {
-          customer: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+          customer: { select: { id: true, name: true, email: true } },
+          user: { select: { id: true, name: true, email: true } },
           items: {
             include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                  sku: true,
-                },
-              },
+              product: { select: { id: true, name: true, price: true, sku: true } },
             },
           },
         },
@@ -129,68 +93,31 @@ export const salesService = {
     })
   },
 
-  async listSales() {
+  async listSales(companyId: number) {
     return await prisma.sale.findMany({
+      where: { companyId },
       include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        customer: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true } },
         items: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                price: true,
-              },
-            },
+            product: { select: { id: true, name: true, price: true } },
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { createdAt: 'desc' },
     })
   },
 
-  async getSaleById(id: number) {
-    const sale = await prisma.sale.findUnique({
-      where: { id },
+  async getSaleById(id: number, companyId: number) {
+    const sale = await prisma.sale.findFirst({
+      where: { id, companyId },
       include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        customer: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true } },
         items: {
           include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                price: true,
-                sku: true,
-              },
-            },
+            product: { select: { id: true, name: true, price: true, sku: true } },
           },
         },
       },
@@ -203,16 +130,14 @@ export const salesService = {
     return sale
   },
 
-  async updateSaleStatus(id: number, status: string) {
+  async updateSaleStatus(id: number, status: string, companyId: number) {
     const validStatuses = ['PENDING', 'COMPLETED', 'CANCELLED']
 
     if (!validStatuses.includes(status)) {
       throw new Error('Status inválido. Use: PENDING, COMPLETED ou CANCELLED')
     }
 
-    const sale = await prisma.sale.findUnique({
-      where: { id },
-    })
+    const sale = await prisma.sale.findFirst({ where: { id, companyId } })
 
     if (!sale) {
       throw new Error('Venda não encontrada')
@@ -223,19 +148,15 @@ export const salesService = {
       data: { status: status as SaleStatus },
       include: {
         customer: true,
-        items: {
-          include: {
-            product: true,
-          },
-        },
+        items: { include: { product: true } },
       },
     })
   },
 
-  async cancelSale(id: number, userId: number) {
+  async cancelSale(id: number, userId: number, companyId: number) {
     return await prisma.$transaction(async (tx) => {
-      const sale = await tx.sale.findUnique({
-        where: { id },
+      const sale = await tx.sale.findFirst({
+        where: { id, companyId },
         include: { items: true },
       })
 
@@ -247,18 +168,12 @@ export const salesService = {
         throw new Error('Venda já está cancelada')
       }
 
-      // Devolver estoque
       for (const item of sale.items) {
         await tx.product.update({
           where: { id: item.productId },
-          data: {
-            stock: {
-              increment: item.quantity,
-            },
-          },
+          data: { stock: { increment: item.quantity } },
         })
 
-        // Registrar devolução
         await tx.stockMovement.create({
           data: {
             productId: item.productId,
@@ -270,55 +185,34 @@ export const salesService = {
         })
       }
 
-      // Atualizar status
       return await tx.sale.update({
         where: { id },
         data: { status: 'CANCELLED' },
         include: {
           customer: true,
-          items: {
-            include: {
-              product: true,
-            },
-          },
+          items: { include: { product: true } },
         },
       })
     })
   },
 
-  async getTotalRevenue() {
+  async getTotalRevenue(companyId: number) {
     const result = await prisma.sale.aggregate({
-      _sum: {
-        total: true,
-      },
-      where: {
-        status: {
-          not: 'CANCELLED', // Ignora vendas canceladas
-        },
-      },
+      _sum: { total: true },
+      where: { companyId, status: { not: 'CANCELLED' } },
     })
 
-    return {
-      totalRevenue: Number(result._sum.total) || 0,
-    }
+    return { totalRevenue: Number(result._sum.total) || 0 }
   },
 
-  async getStats() {
+  async getStats(companyId: number) {
     const [totalResult, countResult] = await Promise.all([
-      // Valor total
       prisma.sale.aggregate({
-        _sum: {
-          total: true,
-        },
-        where: {
-          status: { not: 'CANCELLED' },
-        },
+        _sum: { total: true },
+        where: { companyId, status: { not: 'CANCELLED' } },
       }),
-      // Quantidade de vendas
       prisma.sale.count({
-        where: {
-          status: { not: 'CANCELLED' },
-        },
+        where: { companyId, status: { not: 'CANCELLED' } },
       }),
     ])
 
@@ -326,64 +220,43 @@ export const salesService = {
     const totalSales = countResult
     const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0
 
-    return {
-      totalRevenue,
-      totalSales,
-      averageTicket, // ← Ticket médio
-    }
+    return { totalRevenue, totalSales, averageTicket }
   },
 
-  async getMonthlyRevenue(year?: number) {
+  async getMonthlyRevenue(companyId: number, year?: number) {
     const currentYear = year || new Date().getFullYear()
 
     const sales = await prisma.sale.findMany({
       where: {
+        companyId,
         status: { not: 'CANCELLED' },
         createdAt: {
           gte: new Date(`${currentYear}-01-01`),
           lt: new Date(`${currentYear + 1}-01-01`),
         },
       },
-      select: {
-        total: true,
-        createdAt: true,
-      },
+      select: { total: true, createdAt: true },
     })
 
-    // Agrupar por mês
     const monthlyData = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       revenue: 0,
     }))
 
     sales.forEach((sale) => {
-      const month = sale.createdAt.getMonth() // 0-11
+      const month = sale.createdAt.getMonth()
       monthlyData[month].revenue += Number(sale.total)
     })
 
-    // Nomes dos meses
-    const monthNames = [
-      'Jan',
-      'Fev',
-      'Mar',
-      'Abr',
-      'Mai',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Set',
-      'Out',
-      'Nov',
-      'Dez',
-    ]
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
     return monthlyData.map((data, index) => ({
       month: monthNames[index],
-      revenue: Math.round(data.revenue * 100) / 100, // Arredondar 2 casas
+      revenue: Math.round(data.revenue * 100) / 100,
     }))
   },
 
-  async getTodaySales() {
+  async getTodaySales(companyId: number) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -392,24 +265,18 @@ export const salesService = {
 
     const [totalResult, countResult] = await Promise.all([
       prisma.sale.aggregate({
-        _sum: {
-          total: true,
-        },
+        _sum: { total: true },
         where: {
+          companyId,
           status: { not: 'CANCELLED' },
-          createdAt: {
-            gte: today,
-            lt: tomorrow,
-          },
+          createdAt: { gte: today, lt: tomorrow },
         },
       }),
       prisma.sale.count({
         where: {
+          companyId,
           status: { not: 'CANCELLED' },
-          createdAt: {
-            gte: today,
-            lt: tomorrow,
-          },
+          createdAt: { gte: today, lt: tomorrow },
         },
       }),
     ])
@@ -420,20 +287,14 @@ export const salesService = {
     }
   },
 
-  async getPendingSales() {
+  async getPendingSales(companyId: number) {
     const [totalResult, countResult] = await Promise.all([
       prisma.sale.aggregate({
-        _sum: {
-          total: true,
-        },
-        where: {
-          status: 'PENDING',
-        },
+        _sum: { total: true },
+        where: { companyId, status: 'PENDING' },
       }),
       prisma.sale.count({
-        where: {
-          status: 'PENDING',
-        },
+        where: { companyId, status: 'PENDING' },
       }),
     ])
 

@@ -38,43 +38,6 @@
     --color-focus: rgba(242, 73, 135, 0.25);
     --color-disabled: #d9d9d9;
   }
-
-  /* When the .dark class is applied to the root element, these values override the ones above */
-  .dark {
-    /* Backgrounds */
-    --color-bg-primary: #1c1c1c;
-    --color-bg-secondary: #262626;
-    --color-surface: #2e2e2e;
-
-    /* Shadcn/ui compatibility */
-    --background: #2e2e2e;
-    --foreground: #f2f2f2;
-    --muted-foreground: #9fa6ac;
-    --border: 217 217 217;
-
-    /* Brand */
-    --color-primary: #f24987;
-    --color-primary-hover: #ff6a9e;
-    --color-primary-active: #ff85b1;
-
-    /* Accent */
-    --color-accent: #b2bf4b;
-
-    /* Text */
-    --color-text-primary: #f2f2f2;
-    --color-text-secondary: #d9d9d9;
-    --color-text-muted: #9fa6ac;
-    --color-text-inverse: #262626;
-
-    /* Borders */
-    --color-border-default: rgba(217, 217, 217, 0.15);
-    --color-border-strong: rgba(217, 217, 217, 0.35);
-
-    /* UI states */
-    --color-hover: rgba(242, 73, 135, 0.18);
-    --color-focus: rgba(242, 73, 135, 0.35);
-    --color-disabled: #5f6b73;
-  }
 }
 @layer utilities {
   /* For Firefox (standard property) */
