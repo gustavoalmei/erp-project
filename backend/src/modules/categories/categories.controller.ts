@@ -5,7 +5,8 @@ import { logsService } from '../logs/logs.service'
 export const categoriesController = {
   async list(req: Request, res: Response) {
     try {
-      const categories = await categoriesService.allCategories()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const categories = await categoriesService.allCategories(req.companyId)
       return res.status(200).json(categories)
     } catch (error) {
       const err = error as Error
@@ -15,13 +16,14 @@ export const categoriesController = {
 
   async getById(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = Number(req.params.id)
 
       if (isNaN(id)) {
         return res.status(400).json({ error: 'ID inválido' })
       }
 
-      const category = await categoriesService.getCategoryById(id)
+      const category = await categoriesService.getCategoryById(id, req.companyId)
       return res.status(200).json(category)
     } catch (error) {
       const err = error as Error
@@ -34,15 +36,16 @@ export const categoriesController = {
 
   async create(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const { name } = req.body
 
       if (!name) {
         return res.status(400).json({ error: 'Nome é obrigatório' })
       }
 
-      const category = await categoriesService.createCategory(name)
+      const category = await categoriesService.createCategory(name, req.companyId)
 
-      await logsService.create(`Categoria criada: ${name}`, req.userId)
+      await logsService.create(`Categoria criada: ${name}`, req.userId, req.companyId)
 
       return res.status(201).json({
         message: 'Categoria criada com sucesso',
@@ -59,6 +62,7 @@ export const categoriesController = {
 
   async update(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = Number(req.params.id)
       const { name } = req.body
 
@@ -70,9 +74,9 @@ export const categoriesController = {
         return res.status(400).json({ error: 'Nome é obrigatório' })
       }
 
-      const category = await categoriesService.updateCategory(id, name)
+      const category = await categoriesService.updateCategory(id, name, req.companyId)
 
-      await logsService.create(`Categoria #${id} atualizada: ${name}`, req.userId)
+      await logsService.create(`Categoria #${id} atualizada: ${name}`, req.userId, req.companyId)
 
       return res.status(200).json({
         message: 'Categoria atualizada com sucesso',
@@ -92,15 +96,16 @@ export const categoriesController = {
 
   async delete(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = Number(req.params.id)
 
       if (isNaN(id)) {
         return res.status(400).json({ error: 'ID inválido' })
       }
 
-      const result = await categoriesService.deleteCategory(id)
+      const result = await categoriesService.deleteCategory(id, req.companyId)
 
-      await logsService.create(`Categoria #${id} removida`, req.userId)
+      await logsService.create(`Categoria #${id} removida`, req.userId, req.companyId)
 
       return res.status(200).json(result)
     } catch (error) {

@@ -5,7 +5,8 @@ import { logsService } from '../logs/logs.service'
 export const usersController = {
   async getProfile(req: Request, res: Response) {
     try {
-      const user = await usersService.getProfile(req.userId!)
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const user = await usersService.getProfile(req.userId!, req.companyId)
       return res.json(user)
     } catch (error: unknown) {
       const err = error as { code?: number; message?: string }
@@ -23,7 +24,7 @@ export const usersController = {
       if (!isValidBase64) {
         return res.status(400).json({ error: 'Avatar deve ser uma imagem em base64 válida' })
       }
-      const MAX_AVATAR_SIZE = 2 * 1024 * 1024 // 2MB em bytes
+      const MAX_AVATAR_SIZE = 2 * 1024 * 1024
       const base64Data = avatar.split(',')[1] ?? ''
       const sizeInBytes = Math.ceil((base64Data.length * 3) / 4)
       if (sizeInBytes > MAX_AVATAR_SIZE) {
@@ -31,7 +32,7 @@ export const usersController = {
       }
       const user = await usersService.updateProfile(req.userId!, name, email, avatar)
 
-      await logsService.create(`Perfil atualizado: ${email}`, req.userId)
+      await logsService.create(`Perfil atualizado: ${email}`, req.userId, req.companyId)
 
       return res.json(user)
     } catch (error: unknown) {
@@ -55,7 +56,7 @@ export const usersController = {
       }
       await usersService.changePassword(req.userId!, currentPassword, newPassword)
 
-      await logsService.create('Senha alterada', req.userId)
+      await logsService.create('Senha alterada', req.userId, req.companyId)
 
       return res.json({ message: 'Senha alterada com sucesso' })
     } catch (error: unknown) {
@@ -66,7 +67,8 @@ export const usersController = {
 
   async getAll(req: Request, res: Response) {
     try {
-      const users = await usersService.getAll()
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
+      const users = await usersService.getAll(req.companyId)
       return res.json(users)
     } catch {
       return res.status(500).json({ error: 'Erro interno do servidor' })
@@ -75,6 +77,7 @@ export const usersController = {
 
   async updateUser(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = parseInt(req.params.id as string)
       if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
 
@@ -86,9 +89,9 @@ export const usersController = {
         return res.status(400).json({ error: 'Perfil inválido' })
       }
 
-      const user = await usersService.updateUser(id, name, email, role)
+      const user = await usersService.updateUser(id, name, email, role, req.companyId)
 
-      await logsService.create(`Usuário #${id} atualizado (perfil: ${role})`, req.userId)
+      await logsService.create(`Usuário #${id} atualizado (perfil: ${role})`, req.userId, req.companyId)
 
       return res.json(user)
     } catch (error: unknown) {
@@ -99,12 +102,13 @@ export const usersController = {
 
   async deleteUser(req: Request, res: Response) {
     try {
+      if (!req.companyId) return res.status(403).json({ error: 'Empresa não identificada' })
       const id = parseInt(req.params.id as string)
       if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' })
 
-      await usersService.deleteUser(id)
+      await usersService.deleteUser(id, req.companyId)
 
-      await logsService.create(`Usuário #${id} removido`, req.userId)
+      await logsService.create(`Usuário #${id} removido`, req.userId, req.companyId)
 
       return res.status(204).send()
     } catch (error: unknown) {

@@ -4,7 +4,9 @@ import type {
   RegisterForm,
   LoginResponse,
   RegisterResponse,
+  SelectCompanyResponse,
   Category,
+  Company,
   Product,
   ProductForm,
   Customer,
@@ -59,6 +61,18 @@ export const authService = {
 
   login: async (data: LoginForm) => {
     return await api.post<LoginResponse>('/auth/login', data)
+  },
+
+  getMyCompanies: async () => {
+    return await api.get<Company[]>('/auth/my-companies')
+  },
+
+  createCompany: async (name: string) => {
+    return await api.post<Company>('/auth/create-company', { name })
+  },
+
+  selectCompany: async (companyId: number) => {
+    return await api.post<SelectCompanyResponse>('/auth/select-company', { companyId })
   },
 
   verify: async () => {
@@ -216,18 +230,25 @@ export const customerService = {
 
 // ========== DASHBOARD ==========
 export const dashboardService = {
-  getTopProducts: async (limit: number = 10) => {
-    const response = await api.get(`/products/top-selling?limit=${limit}`)
-    return response.data
-  },
-
-  getTopCustomers: async (limit: number = 10) => {
-    const response = await api.get(`/customers/top-customers?limit=${limit}`)
-    return response.data
-  },
-
-  getSalesTotal: async () => {
-    const response = await api.get<{ totalRevenue: number }>('/sales/total')
+  getSummary: async () => {
+    const response = await api.get<{
+      stats: {
+        totalStockUnits: number
+        totalRevenue: number
+        totalSales: number
+        averageTicket: number
+        totalCustomers: number
+      }
+      today: { totalRevenue: number; totalSales: number }
+      pending: { totalPending: number; count: number }
+      lowStock: {
+        count: number
+        products: { id: number; name: string; stock: number; sku: string }[]
+      }
+      monthlyRevenue: { month: string; revenue: number }[]
+      topProducts: { id: number; name: string; price: number; stock: number; totalSold: number }[]
+      topCustomers: { id: number; name: string; totalSpent: number; totalPurchases: number }[]
+    }>('/dashboard')
     return response.data
   },
 }

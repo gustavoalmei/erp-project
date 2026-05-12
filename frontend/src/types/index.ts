@@ -1,20 +1,36 @@
 // User & Auth
+export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'OPERATOR' | 'VIEWER'
+
 export interface User {
   id: number
   name: string
   email: string
-  role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'OPERATOR' | 'VIEWER'
+  role: UserRole | null
   avatar?: string
+  companyId?: number | null
+  isSuperAdmin?: boolean
 }
 
 export interface UserForm {
   id: number
   name: string
   email: string
-  role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'OPERATOR' | 'VIEWER'
+  role: UserRole
+}
+
+export interface Company {
+  id: number
+  name: string
+  role: UserRole
 }
 
 export interface LoginResponse {
+  token: string
+  user: Omit<User, 'role' | 'companyId'>
+  companies: Company[]
+}
+
+export interface SelectCompanyResponse {
   token: string
   user: User
 }
@@ -115,7 +131,7 @@ export interface SaleForm {
 
 // System Settings
 export interface SystemSettings {
-  id: number
+  companyId: number
   companyName: string
   hasLogo: boolean
   defaultTheme: 'light' | 'dark' | 'system'

@@ -1,15 +1,16 @@
 import { prisma } from '../../utils/prisma'
 
 export const categoriesService = {
-  async allCategories() {
+  async allCategories(companyId: number) {
     return await prisma.category.findMany({
+      where: { companyId },
       orderBy: { name: 'asc' },
     })
   },
 
-  async getCategoryById(id: number) {
-    const category = await prisma.category.findUnique({
-      where: { id },
+  async getCategoryById(id: number, companyId: number) {
+    const category = await prisma.category.findFirst({
+      where: { id, companyId },
     })
 
     if (!category) {
@@ -19,9 +20,9 @@ export const categoriesService = {
     return category
   },
 
-  async createCategory(name: string) {
-    const categoryExists = await prisma.category.findUnique({
-      where: { name },
+  async createCategory(name: string, companyId: number) {
+    const categoryExists = await prisma.category.findFirst({
+      where: { name, companyId },
     })
 
     if (categoryExists) {
@@ -29,13 +30,13 @@ export const categoriesService = {
     }
 
     return await prisma.category.create({
-      data: { name },
+      data: { name, companyId },
     })
   },
 
-  async updateCategory(id: number, name: string) {
-    const category = await prisma.category.findUnique({
-      where: { id },
+  async updateCategory(id: number, name: string, companyId: number) {
+    const category = await prisma.category.findFirst({
+      where: { id, companyId },
     })
 
     if (!category) {
@@ -43,10 +44,7 @@ export const categoriesService = {
     }
 
     const nameExists = await prisma.category.findFirst({
-      where: {
-        name,
-        NOT: { id },
-      },
+      where: { name, companyId, NOT: { id } },
     })
 
     if (nameExists) {
@@ -59,9 +57,9 @@ export const categoriesService = {
     })
   },
 
-  async deleteCategory(id: number) {
-    const category = await prisma.category.findUnique({
-      where: { id },
+  async deleteCategory(id: number, companyId: number) {
+    const category = await prisma.category.findFirst({
+      where: { id, companyId },
       include: { products: true },
     })
 
@@ -73,9 +71,7 @@ export const categoriesService = {
       throw new Error('Categoria possui produtos vinculados')
     }
 
-    await prisma.category.delete({
-      where: { id },
-    })
+    await prisma.category.delete({ where: { id } })
 
     return { message: 'Categoria deletada com sucesso' }
   },

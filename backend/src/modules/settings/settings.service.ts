@@ -39,46 +39,46 @@ export interface UpdateSettingsData {
 }
 
 export const settingsService = {
-  async getSettings() {
+  async getSettings(companyId: number) {
     const settings = await prisma.systemSettings.upsert({
-      where: { id: 1 },
-      create: { id: 1, ...DEFAULT_SETTINGS },
+      where: { companyId },
+      create: { companyId, ...DEFAULT_SETTINGS },
       update: {},
     })
     const { logoBase64, ...rest } = settings
     return { ...rest, hasLogo: !!logoBase64 }
   },
 
-  async getLogo() {
+  async getLogo(companyId: number) {
     const settings = await prisma.systemSettings.findUnique({
-      where: { id: 1 },
+      where: { companyId },
       select: { logoBase64: true },
     })
     return { logoBase64: settings?.logoBase64 ?? null }
   },
 
-  async updateSettings(data: UpdateSettingsData) {
+  async updateSettings(companyId: number, data: UpdateSettingsData) {
     const settings = await prisma.systemSettings.upsert({
-      where: { id: 1 },
-      create: { id: 1, ...DEFAULT_SETTINGS, ...data },
+      where: { companyId },
+      create: { companyId, ...DEFAULT_SETTINGS, ...data },
       update: data,
     })
     const { logoBase64, ...rest } = settings
     return { ...rest, hasLogo: !!logoBase64 }
   },
 
-  async updateLogo(logoBase64: string) {
+  async updateLogo(companyId: number, logoBase64: string) {
     await prisma.systemSettings.upsert({
-      where: { id: 1 },
-      create: { id: 1, ...DEFAULT_SETTINGS, logoBase64 },
+      where: { companyId },
+      create: { companyId, ...DEFAULT_SETTINGS, logoBase64 },
       update: { logoBase64 },
     })
   },
 
-  async deleteLogo() {
+  async deleteLogo(companyId: number) {
     await prisma.systemSettings.upsert({
-      where: { id: 1 },
-      create: { id: 1, ...DEFAULT_SETTINGS },
+      where: { companyId },
+      create: { companyId, ...DEFAULT_SETTINGS },
       update: { logoBase64: null },
     })
   },

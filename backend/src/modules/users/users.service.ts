@@ -4,10 +4,20 @@ import bcrypt from 'bcryptjs'
 import { authConfig } from '../../config/auth'
 
 export const usersService = {
-  async getProfile(userId: number) {
-    const user = await prisma.user.findUnique({ where: { id: userId } })
+  async getProfile(userId: number, companyId: number) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        companies: {
+          where: { companyId },
+          select: { role: true },
+        },
+      },
+    })
     if (!user) throw { code: 404, message: 'Usuário não encontrado' }
-    return { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar }
+
+    const role = user.companies[0]?.role ?? null
+    return { id: user.id, name: user.name, email: user.email, role, avatar: user.avatar }
   },
 
   async updateProfile(userId: number, name: string, email: string, avatar: string) {
@@ -20,13 +30,7 @@ export const usersService = {
       where: { id: userId },
       data: { name, email, avatar },
     })
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-    }
+    return { id: user.id, name: user.name, email: user.email, avatar: user.avatar }
   },
 
   async changePassword(userId: number, currentPassword: string, newPassword: string) {
@@ -43,20 +47,23 @@ export const usersService = {
     })
   },
 
-  async getAll() {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatar: true,
+  async getAll(companyId: number) {
+    const userCompanies = await prisma.userCompany.findMany({
+      where: { companyId },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
       },
     })
-    return users
+
+    return userCompanies.map((uc) => ({
+      ...uc.user,
+      role: uc.role,
+    }))
   },
 
-  async updateUser(userId: number, name: string, email: string, role: string) {
+  async updateUser(userId: number, name: string, email: string, role: string, companyId: number) {
     const emailTaken = await prisma.user.findFirst({
       where: { email, NOT: { id: userId } },
     })
@@ -64,14 +71,29 @@ export const usersService = {
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, role: role as Role },
+      data: { name, email },
     })
-    return { id: user.id, name: user.name, email: user.email, role: user.role }
+
+    await prisma.userCompany.update({
+      where: { userId_companyId: { userId, companyId } },
+      data: { role: role as Role },
+    })
+
+    const userCompany = await prisma.userCompany.findUnique({
+      where: { userId_companyId: { userId, companyId } },
+    })
+
+    return { id: user.id, name: user.name, email: user.email, role: userCompany?.role ?? null }
   },
 
-  async deleteUser(userId: number) {
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (!user) throw { code: 404, message: 'Usuário não encontrado' }
-    await prisma.user.delete({ where: { id: userId } })
+  async deleteUser(userId: number, companyId: number) {
+    const userCompany = await prisma.userCompany.findUnique({
+      where: { userId_companyId: { userId, companyId } },
+    })
+    if (!userCompany) throw { code: 404, message: 'Usuário não encontrado' }
+
+    await prisma.userCompany.delete({
+      where: { userId_companyId: { userId, companyId } },
+    })
   },
 }

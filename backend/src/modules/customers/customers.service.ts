@@ -1,8 +1,9 @@
 import { prisma } from '../../utils/prisma'
 
 export const customersService = {
-  async allCustomers() {
+  async allCustomers(companyId: number) {
     const customers = await prisma.customer.findMany({
+      where: { companyId },
       orderBy: { name: 'asc' },
       select: {
         address: true,
@@ -26,16 +27,13 @@ export const customersService = {
       } else {
         document = customer.document
       }
-      return {
-        ...customer,
-        document,
-      }
+      return { ...customer, document }
     })
   },
 
-  async getCustomerById(id: number) {
-    const customer = await prisma.customer.findUnique({
-      where: { id },
+  async getCustomerById(id: number, companyId: number) {
+    const customer = await prisma.customer.findFirst({
+      where: { id, companyId },
     })
 
     if (!customer) {
@@ -49,18 +47,19 @@ export const customersService = {
     email: string,
     phone: string,
     document: string,
+    companyId: number,
     address?: string,
   ) {
-    const emailExists = await prisma.customer.findUnique({
-      where: { email },
+    const emailExists = await prisma.customer.findFirst({
+      where: { email, companyId },
     })
 
     if (emailExists) {
       throw new Error('Email já cadastrado')
     }
 
-    const documentExists = await prisma.customer.findUnique({
-      where: { document },
+    const documentExists = await prisma.customer.findFirst({
+      where: { document, companyId },
     })
 
     if (documentExists) {
@@ -68,13 +67,7 @@ export const customersService = {
     }
 
     return await prisma.customer.create({
-      data: {
-        name,
-        email,
-        phone,
-        document,
-        address,
-      },
+      data: { name, email, phone, document, address, companyId },
     })
   },
 
@@ -84,10 +77,11 @@ export const customersService = {
     email: string,
     phone: string,
     document: string,
+    companyId: number,
     address?: string,
   ) {
-    const customer = await prisma.customer.findUnique({
-      where: { id },
+    const customer = await prisma.customer.findFirst({
+      where: { id, companyId },
     })
 
     if (!customer) {
@@ -95,8 +89,8 @@ export const customersService = {
     }
 
     if (email !== customer.email) {
-      const emailExists = await prisma.customer.findUnique({
-        where: { email },
+      const emailExists = await prisma.customer.findFirst({
+        where: { email, companyId, NOT: { id } },
       })
 
       if (emailExists) {
@@ -105,8 +99,8 @@ export const customersService = {
     }
 
     if (document !== customer.document) {
-      const documentExists = await prisma.customer.findUnique({
-        where: { document },
+      const documentExists = await prisma.customer.findFirst({
+        where: { document, companyId, NOT: { id } },
       })
 
       if (documentExists) {
@@ -116,19 +110,13 @@ export const customersService = {
 
     return await prisma.customer.update({
       where: { id },
-      data: {
-        name,
-        email,
-        phone,
-        document,
-        address,
-      },
+      data: { name, email, phone, document, address },
     })
   },
 
-  async deleteCustomer(id: number) {
-    const customer = await prisma.customer.findUnique({
-      where: { id },
+  async deleteCustomer(id: number, companyId: number) {
+    const customer = await prisma.customer.findFirst({
+      where: { id, companyId },
       include: { sales: true },
     })
 
@@ -140,56 +128,34 @@ export const customersService = {
       throw new Error('Cliente possui vendas vinculadas')
     }
 
-    await prisma.customer.delete({
-      where: { id },
-    })
+    await prisma.customer.delete({ where: { id } })
 
     return { message: 'Cliente deletado com sucesso' }
   },
 
-  async topCustomers(limit: number = 10) {
-    // Buscar vendas agrupadas por cliente
+  async topCustomers(limit: number = 10, companyId: number) {
     const topCustomers = await prisma.sale.groupBy({
       by: ['customerId'],
-      _sum: {
-        total: true, // ← Soma o valor total gasto
-      },
-      _count: {
-        id: true, // ← Conta quantas compras fez
-      },
-      where: {
-        status: {
-          not: 'CANCELLED', // ← Ignora vendas canceladas
-        },
-      },
-      orderBy: {
-        _sum: {
-          total: 'desc', // ← Ordena por quem gastou mais
-        },
-      },
+      _sum: { total: true },
+      _count: { id: true },
+      where: { companyId, status: { not: 'CANCELLED' } },
+      orderBy: { _sum: { total: 'desc' } },
       take: limit,
     })
 
-    // Buscar detalhes dos clientes
     const customerIds = topCustomers.map((item) => item.customerId)
 
     const customers = await prisma.customer.findMany({
-      where: {
-        id: { in: customerIds },
-      },
-      select: {
-        id: true,
-        name: true,
-      },
+      where: { id: { in: customerIds }, companyId },
+      select: { id: true, name: true },
     })
 
-    // Combinar dados
     return topCustomers.map((item) => {
       const customer = customers.find((c) => c.id === item.customerId)
       return {
         ...customer,
-        totalSpent: Number(item._sum.total) || 0, // Total gasto
-        totalPurchases: item._count.id, // Quantidade de compras
+        totalSpent: Number(item._sum.total) || 0,
+        totalPurchases: item._count.id,
       }
     })
   },

@@ -1,17 +1,19 @@
 import { prisma } from '../../utils/prisma'
 
 export const logsService = {
-  async create(message: string, userId?: number) {
+  async create(message: string, userId?: number, companyId?: number) {
     await prisma.activityLog.create({
       data: {
         message,
         userId: userId ?? null,
+        companyId: companyId ?? null,
       },
     })
   },
 
-  async getAll() {
+  async getAll(companyId: number) {
     return prisma.activityLog.findMany({
+      where: { companyId },
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
@@ -20,9 +22,10 @@ export const logsService = {
       },
     })
   },
-  async getByUserId(userId: number) {
+
+  async getByUserId(userId: number, companyId: number) {
     return prisma.activityLog.findMany({
-      where: { userId },
+      where: { userId, companyId },
       orderBy: { createdAt: 'desc' },
       include: {
         user: {

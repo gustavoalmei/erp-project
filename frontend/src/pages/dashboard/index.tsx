@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
-import type { Customer, Product } from '../../types/index.ts'
 import {
   Table,
   TableBody,
@@ -16,7 +15,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '../../components/ui/chart'
-import { dashboardService, productService, saleService } from '@/services/api.ts'
+import { dashboardService } from '@/services/api.ts'
 import {
   AlertTriangle,
   Clock,
@@ -28,156 +27,50 @@ import {
   User,
 } from 'lucide-react'
 
-interface TopProduct extends Product {
-  totalSold: string
-}
-
-interface revenueDataItem {
-  month: string
-  revenue: number
-  expenses: number
-}
-
-interface lowStockData {
-  count: number
-  products: {
-    id: number
-    name: string
-    stock: number
-    sku: string
-  }[]
-}
-
-interface TopCustomers extends Customer {
-  totalSpent: number
-  totalPurchases: number
-}
+type Summary = Awaited<ReturnType<typeof dashboardService.getSummary>>
 
 export function Dashboard() {
-  const [topProducts, setTopProducts] = useState<TopProduct[]>([])
-  const [topCustomers, setTopCustomers] = useState<TopCustomers[]>([])
-  const [totalProducts, setTotalProducts] = useState(0)
-  const [salesTotal, setSalesTotal] = useState(0)
-  const [salesStats, setSalesStats] = useState({
-    totalRevenue: 0,
-    totalSales: 0,
-    averageTicket: 0,
-  })
-  const [revenueData, setRevenueData] = useState<revenueDataItem[]>([])
-  const [todaySales, setTodaySales] = useState({ totalRevenue: 0, totalSales: 0 })
-  const [pendingSales, setPendingSales] = useState({ totalPending: 0, count: 0 })
-  const [lowStock, setLowStock] = useState<lowStockData>({ count: 0, products: [] })
-  const [growth, setGrowth] = useState(0)
+  const [data, setData] = useState<Summary | null>(null)
 
-  const loadData = async () => {
-    const [today, pending, stock, monthlyData] = await Promise.allSettled([
-      saleService.getTodaySales(),
-      saleService.getPendingSales(),
-      productService.getLowStock(10),
-      saleService.getMonthlyRevenue(),
-    ])
+  const formatPrice = (value: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
-    if (today.status === 'fulfilled') setTodaySales(today.value)
-    if (pending.status === 'fulfilled') setPendingSales(pending.value)
-    if (stock.status === 'fulfilled') setLowStock(stock.value as lowStockData)
+  useEffect(() => {
+    dashboardService
+      .getSummary()
+      .then(setData)
+      .catch(() => {})
+  }, [])
 
-    if (monthlyData.status === 'fulfilled') {
-      const data = monthlyData.value
-      const currentMonth = new Date().getMonth()
-      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
-      const currentRevenue = data[currentMonth]?.revenue || 0
-      const lastRevenue = data[lastMonth]?.revenue || 0
-      const growthPercent =
-        lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue) * 100 : 0
-      setGrowth(Math.round(growthPercent * 10) / 10)
-    }
-  }
-
-  const loadRevenueData = async () => {
-    try {
-      const data = await saleService.getMonthlyRevenue(2025)
-      const formattedData = data.map((item) => ({
-        ...item,
-        expenses: 0,
-      }))
-      setRevenueData(formattedData)
-    } catch {
-      // sem permissão ou erro — mantém vazio
-    }
-  }
-
-  const returnFormatPrice = (price: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price)
-  }
-
-  const fetchProduts = async () => {
-    try {
-      const response = await productService.getAll()
-      const values = response.reduce((val1, val2) => val1 + val2.stock, 0)
-      setTotalProducts(values)
-    } catch {
-      // sem permissão ou erro — mantém 0
-    }
-  }
-
-  const fetchTopProducts = async (limit: number = 10) => {
-    try {
-      const data = await dashboardService.getTopProducts(limit)
-      setTopProducts(data)
-    } catch {
-      // sem permissão ou erro — mantém vazio
-    }
-  }
-
-  const fetchTopCustomers = async (limit: number = 10) => {
-    try {
-      const data = await dashboardService.getTopCustomers(limit)
-      setTopCustomers(data)
-    } catch {
-      // sem permissão ou erro — mantém vazio
-    }
-  }
-
-  const fetchSalesTotal = async () => {
-    try {
-      const data = await dashboardService.getSalesTotal()
-      setSalesTotal(data.totalRevenue)
-    } catch {
-      // sem permissão ou erro — mantém 0
-    }
-  }
-
-  const fetchSalesStats = async () => {
-    try {
-      const response = await saleService.getStats()
-      setSalesStats(response.data)
-    } catch {
-      // sem permissão ou erro — mantém valores padrão
-    }
-  }
+  const monthlyRevenue = data?.monthlyRevenue ?? []
+  const currentMonth = new Date().getMonth()
+  const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
+  const growth = (() => {
+    const cur = monthlyRevenue[currentMonth]?.revenue ?? 0
+    const prev = monthlyRevenue[lastMonth]?.revenue ?? 0
+    if (prev === 0) return 0
+    return Math.round(((cur - prev) / prev) * 1000) / 10
+  })()
 
   const cards = [
     {
       title: 'Total Produtos',
-      value: totalProducts,
+      value: data?.stats.totalStockUnits ?? 0,
       icon: <Package />,
     },
     {
       title: 'Total de Vendas',
-      value: returnFormatPrice(salesTotal),
+      value: formatPrice(data?.stats.totalRevenue ?? 0),
       icon: <DollarSign />,
     },
     {
       title: 'Total de Clientes',
-      value: topCustomers.length,
+      value: data?.stats.totalCustomers ?? 0,
       icon: <User />,
     },
     {
       title: 'Ticket Médio',
-      value: returnFormatPrice(salesStats.averageTicket),
+      value: formatPrice(data?.stats.averageTicket ?? 0),
       icon: <DollarSign />,
     },
   ]
@@ -185,25 +78,25 @@ export function Dashboard() {
   const subCards = [
     {
       title: 'Vendas Hoje',
-      value: returnFormatPrice(todaySales.totalRevenue),
+      value: formatPrice(data?.today.totalRevenue ?? 0),
       icon: <Sun />,
-      subValue: `${todaySales.totalSales} vendas`,
+      subValue: `${data?.today.totalSales ?? 0} vendas`,
     },
     {
       title: 'Vendas Pendentes',
-      value: pendingSales.count,
+      value: data?.pending.count ?? 0,
       icon: <Clock />,
-      subValue: returnFormatPrice(pendingSales.totalPending),
+      subValue: formatPrice(data?.pending.totalPending ?? 0),
     },
     {
       title: 'Estoque Baixo',
-      value: lowStock.count,
+      value: data?.lowStock.count ?? 0,
       icon: <AlertTriangle />,
       subValue: 'Produtos abaixo de 10 un',
     },
     {
       title: 'Crescimento',
-      value: growth > 0 ? '+' + growth : growth,
+      value: growth > 0 ? `+${growth}` : growth,
       icon:
         growth >= 0 ? (
           <TrendingUp className="text-green-500" />
@@ -216,41 +109,12 @@ export function Dashboard() {
   ]
 
   const chartConfig = {
-    month: {
-      label: 'Mês',
-      theme: {
-        light: '#f24987',
-        dark: '#f24987',
-      },
-    },
-    revenue: {
-      label: 'Receita',
-      theme: {
-        light: '#f24987',
-        dark: '#f24987',
-      },
-    },
-    expenses: {
-      label: 'Despesas',
-      theme: {
-        light: '#b2bf4b',
-        dark: '#b2bf4b',
-      },
-    },
+    month: { label: 'Mês', theme: { light: '#f24987', dark: '#f24987' } },
+    revenue: { label: 'Receita', theme: { light: '#f24987', dark: '#f24987' } },
+    expenses: { label: 'Despesas', theme: { light: '#b2bf4b', dark: '#b2bf4b' } },
   } satisfies ChartConfig
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      await fetchTopProducts()
-      await fetchTopCustomers()
-      await fetchProduts()
-      await fetchSalesTotal()
-      await fetchSalesStats()
-      await loadData()
-      await loadRevenueData()
-    }
-    fetchAll()
-  }, [])
+  const revenueData = monthlyRevenue.map((item) => ({ ...item, expenses: 0 }))
 
   return (
     <Card className="p-4 border-color-border-default cursor-default">
@@ -307,14 +171,8 @@ export function Dashboard() {
             <CardTitle className="font-bold text-xl text-color-text-primary">
               Receita Mensal
             </CardTitle>
-            <CardDescription
-              className="
-          font-medium
-          text-sm
-          text-color-text-muted
-          "
-            >
-              Receita ao longo dos meses de 2025
+            <CardDescription className="font-medium text-sm text-color-text-muted">
+              Receita ao longo dos meses de {new Date().getFullYear()}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -376,13 +234,7 @@ export function Dashboard() {
             <CardTitle className="font-bold text-xl text-color-text-primary">
               Top 10 Produtos
             </CardTitle>
-            <CardDescription
-              className="
-          font-medium 
-          text-sm 
-          text-color-text-muted
-          "
-            >
+            <CardDescription className="font-medium text-sm text-color-text-muted">
               Top 10 produtos mais vendidos
             </CardDescription>
           </CardHeader>
@@ -392,7 +244,7 @@ export function Dashboard() {
                 <TableRow>
                   <TableHead className="min-w-[250px] font-bold">Produto</TableHead>
                   <TableHead className="min-w-[100px] font-bold">Preço</TableHead>
-                  <TableHead className="min-ww-[100px] font-bold text-center">Estoque</TableHead>
+                  <TableHead className="min-w-[100px] font-bold text-center">Estoque</TableHead>
                   <TableHead className="min-w-[120px] text-center font-bold">
                     Total Vendido
                   </TableHead>
@@ -400,14 +252,14 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topProducts.map((product) => (
+                {(data?.topProducts ?? []).map((product) => (
                   <TableRow key={product.id} className="hover:bg-color-bg-secondary">
                     <TableCell>{product.name}</TableCell>
-                    <TableCell>{returnFormatPrice(product.price)}</TableCell>
+                    <TableCell>{formatPrice(product.price)}</TableCell>
                     <TableCell className="text-center">{product.stock}</TableCell>
                     <TableCell className="text-center">{product.totalSold}</TableCell>
                     <TableCell className="text-center">
-                      {returnFormatPrice(Number(product.totalSold) * product.price)}
+                      {formatPrice(product.totalSold * product.price)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -415,19 +267,14 @@ export function Dashboard() {
             </Table>
           </CardContent>
         </Card>
+
         <Card className="bg-color-surface border-color-border-default overflow-auto">
           <CardHeader>
             <CardTitle className="font-bold text-xl text-color-text-primary">
               Top 10 Clientes
             </CardTitle>
-            <CardDescription
-              className="
-          font-medium 
-          text-sm 
-          text-color-text-muted
-          "
-            >
-              Top 10 Clientes que mais gastaram
+            <CardDescription className="font-medium text-sm text-color-text-muted">
+              Top 10 clientes que mais gastaram
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -442,13 +289,13 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topCustomers.map((customers) => (
-                  <TableRow key={customers.id} className="hover:bg-color-bg-secondary">
-                    <TableCell>{customers.name}</TableCell>
+                {(data?.topCustomers ?? []).map((customer) => (
+                  <TableRow key={customer.id} className="hover:bg-color-bg-secondary">
+                    <TableCell>{customer.name}</TableCell>
                     <TableCell className="text-center">
-                      {returnFormatPrice(customers.totalSpent)}
+                      {formatPrice(customer.totalSpent)}
                     </TableCell>
-                    <TableCell className="text-center">{customers.totalPurchases}</TableCell>
+                    <TableCell className="text-center">{customer.totalPurchases}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -463,13 +310,7 @@ export function Dashboard() {
             <CardTitle className="font-bold text-xl text-color-text-primary">
               Últimas Vendas
             </CardTitle>
-            <CardDescription
-              className="
-          font-medium 
-          text-sm 
-          text-color-text-muted
-          "
-            >
+            <CardDescription className="font-medium text-sm text-color-text-muted">
               Top 10 produtos mais vendidos
             </CardDescription>
           </CardHeader>
@@ -479,7 +320,7 @@ export function Dashboard() {
                 <TableRow>
                   <TableHead className="min-w-[250px] font-bold">Produto</TableHead>
                   <TableHead className="min-w-[100px] font-bold text-center">Preço</TableHead>
-                  <TableHead className="min-ww-[100px] font-bold text-center">Estoque</TableHead>
+                  <TableHead className="min-w-[100px] font-bold text-center">Estoque</TableHead>
                   <TableHead className="min-w-[120px] text-center font-bold">
                     Total Vendido
                   </TableHead>
@@ -487,16 +328,14 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topProducts.map((product) => (
+                {(data?.topProducts ?? []).map((product) => (
                   <TableRow key={product.id} className="hover:bg-color-bg-secondary">
                     <TableCell>{product.name}</TableCell>
-                    <TableCell className="text-center">
-                      {returnFormatPrice(product.price)}
-                    </TableCell>
+                    <TableCell className="text-center">{formatPrice(product.price)}</TableCell>
                     <TableCell className="text-center">{product.stock}</TableCell>
                     <TableCell className="text-center">{product.totalSold}</TableCell>
                     <TableCell className="text-center">
-                      {returnFormatPrice(Number(product.totalSold) * product.price)}
+                      {formatPrice(product.totalSold * product.price)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -504,18 +343,13 @@ export function Dashboard() {
             </Table>
           </CardContent>
         </Card>
+
         <Card className="bg-color-surface border-color-border-default overflow-auto">
           <CardHeader>
             <CardTitle className="font-bold text-xl text-color-text-primary">
               Produtos Estoque Baixo
             </CardTitle>
-            <CardDescription
-              className="
-          font-medium 
-          text-sm 
-          text-color-text-muted
-          "
-            >
+            <CardDescription className="font-medium text-sm text-color-text-muted">
               Lista de produtos com estoque baixo
             </CardDescription>
           </CardHeader>
@@ -528,7 +362,7 @@ export function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lowStock.products.map((product) => (
+                {(data?.lowStock.products ?? []).map((product) => (
                   <TableRow key={product.id} className="hover:bg-color-bg-secondary">
                     <TableCell>{product.name}</TableCell>
                     <TableCell className="text-center">{product.stock}</TableCell>
